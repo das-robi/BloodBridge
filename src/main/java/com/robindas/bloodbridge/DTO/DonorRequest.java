@@ -2,26 +2,22 @@ package com.robindas.bloodbridge.DTO;
 
 import java.time.LocalDate;
 
-public class DonorResponse {
+public class DonorRequest {
 
-    private Integer donId;
     private String bldGroup;
     private String city;
-    private String district;
     private String phone;
+    private String district;
     private LocalDate lastDonateDate;
     private boolean available;
 
-    public DonorResponse(Integer donId, String bldGroup, String city, String phone, LocalDate lastDonateDate, String district, boolean available) {
+    public DonorRequest(String bldGroup, String city, String phone, LocalDate lastDonateDate, String district, boolean available) {
         this.bldGroup = bldGroup;
         this.city = city;
         this.phone = phone;
         this.lastDonateDate = lastDonateDate;
         this.available = available;
-        this.donId = donId;
-    }
-
-    public DonorResponse() {
+        this.district = district;
     }
 
     public String getBldGroup() {
@@ -70,13 +66,5 @@ public class DonorResponse {
 
     public void setAvailable(boolean available) {
         this.available = available;
-    }
-
-    public Integer getDonId() {
-        return donId;
-    }
-
-    public void setDonId(Integer donId) {
-        this.donId = donId;
     }
 }

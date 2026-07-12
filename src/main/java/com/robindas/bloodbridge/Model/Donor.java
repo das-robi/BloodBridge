@@ -1,5 +1,6 @@
 package com.robindas.bloodbridge.Model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,6 +19,9 @@ public class Donor {
     public Users users;
     private String bldGroup;
     private String city;
+    private String district;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate lastDonateDate;
     private String phone;
     private boolean available;

@@ -1,13 +1,13 @@
 package com.robindas.bloodbridge.DTO;
 
-public class LoginResponse{
+public class LoginRequest {
 
     private String userName;
     private String userEmail;
     private String passWord;
 
 
-    public LoginResponse(String userName, String userEmail, String passWord) {
+    public LoginRequest(String userName, String userEmail, String passWord) {
         this.userName = userName;
         this.userEmail = userEmail;
         this.passWord = passWord;
@@ -39,7 +39,7 @@ public class LoginResponse{
 
     @Override
     public String toString() {
-        return "LoginResponse{" +
+        return "LoginRequest{" +
                 "userName='" + userName + '\'' +
                 ", userEmail='" + userEmail + '\'' +
                 ", passWord='" + passWord + '\'' +

@@ -1,18 +1,17 @@
 package com.robindas.bloodbridge.Services;
 
-import com.robindas.bloodbridge.DTO.LoginResponse;
-import com.robindas.bloodbridge.DTO.RegisterResponse;
+import com.robindas.bloodbridge.DTO.LoginRequest;
+import com.robindas.bloodbridge.DTO.RegisterRequest;
+import com.robindas.bloodbridge.DTO.UserResponse;
 import com.robindas.bloodbridge.Model.Users;
 import com.robindas.bloodbridge.Repositories.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class UserServices {
@@ -28,7 +27,7 @@ public class UserServices {
 
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
-    public Users UserRegister(RegisterResponse response) {
+    public Users UserRegister(RegisterRequest response) {
 
         Users users = new Users();
 
@@ -44,7 +43,7 @@ public class UserServices {
     }
 
 
-    public String verifyUser(LoginResponse response) {
+    public String verifyUser(LoginRequest response) {
 
         Authentication authentication = authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(response.getUserName(), response.getPassWord()));
@@ -55,8 +54,40 @@ public class UserServices {
         return "Fail";
     }
 
-    public List<Users> getAllUsers() {
+    public UserResponse getProfile() {
 
-        return repository.findAll();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
+
+        Users users = repository.getUserByUserName(username);
+
+        UserResponse response = new UserResponse();
+
+        response.setUserName(users.getUserName());
+        response.setUserEmail(users.getUserEmail());
+
+        return response;
+    }
+
+    //Update Profile
+    public UserResponse userUpdateProfile(int id, UserResponse response) {
+
+        //check Authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        //Find User
+        Users users = repository.getUserByUserName(username);
+
+        //Update data
+        users.setUserName(response.getUserName());
+        users.setUserEmail(response.getUserEmail());
+
+        //Convert to response
+        response.setUserName(users.getUserName());
+        response.setUserEmail(users.getUserEmail());
+
+        return response;
     }
 }

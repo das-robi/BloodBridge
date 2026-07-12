@@ -1,7 +1,7 @@
 package com.robindas.bloodbridge.Controllers;
 
-import com.robindas.bloodbridge.DTO.LoginResponse;
-import com.robindas.bloodbridge.DTO.RegisterResponse;
+import com.robindas.bloodbridge.DTO.LoginRequest;
+import com.robindas.bloodbridge.DTO.RegisterRequest;
 import com.robindas.bloodbridge.Services.UserServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,14 +18,14 @@ public class AuthController {
     private UserServices userServices;
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody RegisterResponse response){
+    public ResponseEntity<String> registerUser(@RequestBody RegisterRequest response){
         userServices.UserRegister(response);
 
         return ResponseEntity.ok("Register Success");
     }
 
     @PostMapping("/login")
-    public String loginUser(@RequestBody LoginResponse response){
+    public String loginUser(@RequestBody LoginRequest response){
        return userServices.verifyUser(response);
     }
 
