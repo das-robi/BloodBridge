@@ -1,9 +1,6 @@
 package com.robindas.bloodbridge.Model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -17,8 +14,18 @@ public class BloodRequest {
     private String patientName;
     private String bldGroup;
     private String city;
+    private String district;
     private String hospital;
+    private String unit;
+    private String disease;
     private String status;
-    private String createBy;
+
+//    @ManyToMany
+//    @JoinColumn(name = "create_by")
+//    private Users createBy;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private Users createdBy;
 
 }

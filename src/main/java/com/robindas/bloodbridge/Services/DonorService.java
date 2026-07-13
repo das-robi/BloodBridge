@@ -1,9 +1,13 @@
 package com.robindas.bloodbridge.Services;
 
+import com.robindas.bloodbridge.DTO.BldReqDTO;
+import com.robindas.bloodbridge.DTO.BldReqResponse;
 import com.robindas.bloodbridge.DTO.DonorRequest;
 import com.robindas.bloodbridge.DTO.DonorResponse;
+import com.robindas.bloodbridge.Model.BloodRequest;
 import com.robindas.bloodbridge.Model.Donor;
 import com.robindas.bloodbridge.Model.Users;
+import com.robindas.bloodbridge.Repositories.BloodRequestRepo;
 import com.robindas.bloodbridge.Repositories.DonorRepository;
 import com.robindas.bloodbridge.Repositories.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,32 +15,30 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.List;
 
 @Service
 public class DonorService {
 
     @Autowired
     private DonorRepository donorRepository;
-
     @Autowired
     private UsersRepository usersRepository;
+    @Autowired
+    private BloodRequestRepo bldRepository;
+    @Autowired
+    private NotificationService notificationService;
     
     public DonorResponse getDonorProfile() {
 
-        //check authentication and get Name
+        //Check User is Logged-In
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-
-        //Find user by username and also find donor by user and set Donors details
         Users users = usersRepository.getUserByUserName(username);
 
         System.out.println("Users Details: " + users);
 
         Donor donor = donorRepository.getDonorByUsers(users);
-
-//        System.out.println("Donors Info : " + donor);
-
 
         if (donor == null){
 
@@ -57,6 +59,7 @@ public class DonorService {
 
     public DonorResponse createDonor(DonorRequest request) {
 
+        //Check User is Logged-In
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
@@ -95,8 +98,10 @@ public class DonorService {
         return response;
     }
 
+    //Donor Update profile
     public DonorResponse updateProfile(DonorRequest request){
 
+        //Check User is Logged-In
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
@@ -125,7 +130,10 @@ public class DonorService {
         return response;
     }
 
+    //Donor Profile Delete
     public void deleteDonorProfile() {
+
+        //Check User is Logged-In
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         Users users = usersRepository.getUserByUserName(username);
@@ -136,4 +144,75 @@ public class DonorService {
 
         donorRepository.delete(donor);
     }
+
+
+    //Saving Users BloodRequest and Matching Request Blood Group and District
+    public BldReqResponse requestForBlood(BldReqDTO bldReqDTO) {
+
+        //Check User is Logged-In
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Users users = usersRepository.getUserByUserName(username);
+
+        //Set users saveRequest into BloodRequest Entitiy
+        BloodRequest saveRequest = new BloodRequest();
+
+        saveRequest.setPatientName(bldReqDTO.getPatientName());
+        saveRequest.setBldGroup(bldReqDTO.getBldGroup());
+        saveRequest.setCity(bldReqDTO.getCity());
+        saveRequest.setDistrict(bldReqDTO.getDistrict());
+        saveRequest.setDisease(bldReqDTO.getDisease());
+        saveRequest.setHospital(bldReqDTO.getHospital());
+        saveRequest.setUnit(bldReqDTO.getUnit());
+        saveRequest.setStatus("Pending");
+
+        saveRequest.setCreatedBy(users);
+
+        //Save Blood Request
+        saveRequest = bldRepository.save(saveRequest);
+
+        //Finding matching Donor
+        List<Donor> donor = donorRepository.findByBldGroupAndDistrict(
+                saveRequest.getBldGroup(), saveRequest.getDistrict());
+
+
+        BldReqResponse response = new BldReqResponse();
+
+        response.setPatientName(saveRequest.getPatientName());
+        response.setBldGroup(saveRequest.getBldGroup());
+        response.setBldGroup(saveRequest.getDisease());
+        response.setHospital(saveRequest.getHospital());
+        response.setUnit(saveRequest.getUnit());
+        response.setDistrict(saveRequest.getDistrict());
+        response.setCity(saveRequest.getCity());
+        response.setStatus(saveRequest.getStatus());
+
+        System.out.println("Finding All Donor: " + donor.size());
+
+        for (Donor donor1 : donor){
+
+            //Debug
+            System.out.println("Donor BloodGroup: " + donor1.getBldGroup());
+            System.out.println("Donor City: " + donor1.getCity());
+            System.out.println("Donor District " + donor1.getDistrict());
+            System.out.println("Donor Phone " + donor1.getPhone());
+            System.out.println("Donor last date of blood donate" + donor1.getLastDonateDate());
+
+
+            //Create Notification and Send matching users
+            notificationService.createNotification(
+                    "Urgent Need Blood",
+                    "A patient need " + saveRequest.getBldGroup() + "blood at " + saveRequest.getHospital(),
+                    donor1.getUsers(),
+                    saveRequest);
+
+
+
+            //Check Notification are sending
+            System.out.println("Notification Sent to users: " + donor1.getUsers().getUserName());
+        }
+
+        return response;
+    }
+
 }
