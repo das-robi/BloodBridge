@@ -154,7 +154,7 @@ public class DonorService {
         String username = authentication.getName();
         Users users = usersRepository.getUserByUserName(username);
 
-        //Set users saveRequest into BloodRequest Entitiy
+        //Set users saveRequest into BloodRequest Entity
         BloodRequest saveRequest = new BloodRequest();
 
         saveRequest.setPatientName(bldReqDTO.getPatientName());
