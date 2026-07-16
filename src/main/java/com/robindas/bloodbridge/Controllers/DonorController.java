@@ -5,6 +5,7 @@ import com.robindas.bloodbridge.DTO.BldReqResponse;
 import com.robindas.bloodbridge.DTO.DonorRequest;
 import com.robindas.bloodbridge.DTO.DonorResponse;
 import com.robindas.bloodbridge.Model.BloodRequest;
+import com.robindas.bloodbridge.Model.Donor;
 import com.robindas.bloodbridge.Services.DonorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ public class DonorController {
 
     @GetMapping("/donor/me")
     public ResponseEntity<DonorResponse> donorProfile(){
-        return new ResponseEntity<>(donorService.getDonorProfile(), HttpStatus.FOUND);
+        return new ResponseEntity<>(donorService.getDonorProfile(), HttpStatus.OK);
     }
 
     @PostMapping("/create-donor")
@@ -29,8 +30,8 @@ public class DonorController {
     }
 
     @PutMapping("/donor/profile-update")
-    public ResponseEntity<DonorResponse> updateProfile(@RequestBody DonorRequest request){
-        return ResponseEntity.ok(donorService.updateProfile(request));
+    public ResponseEntity<Donor> updateProfile(@RequestBody DonorRequest request){
+        return new ResponseEntity<>(donorService.updateProfile(request), HttpStatus.OK);
     }
 
 

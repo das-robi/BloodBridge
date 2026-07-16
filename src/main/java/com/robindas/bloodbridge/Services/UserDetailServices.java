@@ -22,8 +22,6 @@ public class UserDetailServices implements UserDetailsService {
 
         Users users = repository.getUserByUserName(username);
 
-        System.out.println("UsersName " + users);
-
         if (users == null){
             System.out.println("User Not Found");
 

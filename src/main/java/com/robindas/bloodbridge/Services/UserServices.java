@@ -7,25 +7,30 @@ import com.robindas.bloodbridge.Model.Users;
 import com.robindas.bloodbridge.Repositories.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class UserServices {
 
     @Autowired
     private UsersRepository repository;
-
     @Autowired
     AuthenticationManager authManager;
-
     @Autowired
     private JwtTokenServices jwtTokenServices;
 
+
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+
 
     public Users UserRegister(RegisterRequest response) {
 
@@ -43,18 +48,19 @@ public class UserServices {
     }
 
 
-    public String verifyUser(LoginRequest response) {
+    public String verifyUser(LoginRequest request) {
 
         Authentication authentication = authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(response.getUserName(), response.getPassWord()));
+                new UsernamePasswordAuthenticationToken(request.getUserName(), request.getPassWord()));
 
         if (authentication.isAuthenticated()){
-           return jwtTokenServices.generateKey(response.getUserName());
+            return jwtTokenServices.generateKey(request.getUserName());
         }
-        return "Fail";
+
+        return "User not found";
     }
 
-    public UserResponse getProfile() {
+    public Users getProfileById(int id) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -62,32 +68,25 @@ public class UserServices {
 
         Users users = repository.getUserByUserName(username);
 
-        UserResponse response = new UserResponse();
-
-        response.setUserName(users.getUserName());
-        response.setUserEmail(users.getUserEmail());
-
-        return response;
+        return repository.findById(id).orElseThrow(()-> new RuntimeException("user not found"));
     }
 
     //Update Profile
-    public UserResponse userUpdateProfile(int id, UserResponse response) {
+    public Users userUpdateProfile(int id, UserResponse response) {
 
         //check Authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-
-        //Find User
         Users users = repository.getUserByUserName(username);
 
+
+        Users existingUsers = repository.findById(id).orElseThrow(()-> new RuntimeException("User not found"));
+
         //Update data
-        users.setUserName(response.getUserName());
-        users.setUserEmail(response.getUserEmail());
+        existingUsers.setUserName(response.getUserName());
+        existingUsers.setUserEmail(response.getUserEmail());
 
-        //Convert to response
-        response.setUserName(users.getUserName());
-        response.setUserEmail(users.getUserEmail());
 
-        return response;
+        return repository.save(existingUsers);
     }
 }

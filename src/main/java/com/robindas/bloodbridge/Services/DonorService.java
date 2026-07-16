@@ -42,7 +42,7 @@ public class DonorService {
 
         if (donor == null){
 
-            throw new RuntimeException("Dont have your Donor account");
+            throw new RuntimeException("Don't have your Donor account");
         }
 
         DonorResponse response = new DonorResponse();
@@ -99,7 +99,7 @@ public class DonorService {
     }
 
     //Donor Update profile
-    public DonorResponse updateProfile(DonorRequest request){
+    public Donor updateProfile(DonorRequest request){
 
         //Check User is Logged-In
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -109,25 +109,25 @@ public class DonorService {
 
         Donor donor = donorRepository.getDonorByUsers(users);
 
-//        donor.setDonId(request.get);
+//        donor.setDonId(request.);
         donor.setCity(request.getCity());
         donor.setPhone(request.getPhone());
         donor.setDistrict(request.getDistrict());
         donor.setLastDonateDate(request.getLastDonateDate());
 
-        donor = donorRepository.save(donor);
+        System.out.println("User Update: " + donor);
 
         //Convert to response
-        DonorResponse response = new DonorResponse();
+//        DonorResponse response = new DonorResponse();
+//
+//        response.setDonId(donor.getDonId());
+//        response.setCity(request.getCity());
+//        response.setDistrict(request.getDistrict());
+//        response.setPhone(request.getPhone());
+//        response.setLastDonateDate(request.getLastDonateDate());
+//        response.setAvailable(donor.isAvailable());
 
-        response.setDonId(donor.getDonId());
-        response.setCity(request.getCity());
-        response.setDistrict(request.getDistrict());
-        response.setPhone(request.getPhone());
-        response.setLastDonateDate(request.getLastDonateDate());
-        response.setAvailable(donor.isAvailable());
-
-        return response;
+        return donorRepository.save(donor);
     }
 
     //Donor Profile Delete

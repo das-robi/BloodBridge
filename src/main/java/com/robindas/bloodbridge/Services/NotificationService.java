@@ -5,6 +5,8 @@ import com.robindas.bloodbridge.Model.Notification;
 import com.robindas.bloodbridge.Model.Users;
 import com.robindas.bloodbridge.Repositories.NotificationRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,6 +24,15 @@ public class NotificationService {
         notification.setBloodRequest(bloodRequest);
 
         notificationRepo.save(notification);
+    }
+
+
+    public void markRead(int id) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+
 
     }
 }

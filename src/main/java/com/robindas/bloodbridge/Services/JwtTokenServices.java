@@ -6,7 +6,6 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Date;
@@ -31,21 +30,20 @@ public class JwtTokenServices {
             KeyGenerator genKey = KeyGenerator.getInstance("HmacSHA256");
             SecretKey sk = genKey.generateKey();
             secreteKey = Base64.getEncoder().encodeToString(sk.getEncoded());
-
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
 
     }
 
-    public String generateKey(String name) {
+    public String generateKey(String username) {
 
         Map<String, Object> claims = new HashMap<>();
 
         return Jwts.builder()
                 .claims()
                 .add(claims)
-                .subject(name)
+                .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 30))
                 .and()
@@ -64,10 +62,10 @@ public class JwtTokenServices {
         return extractClaims(token, Claims::getSubject);
     }
 
-    private <T> T extractClaims(String token, Function<Claims, T> claimsResolver) {
+    private <T> T extractClaims(String token, Function<Claims, T> claimsTFunction) {
 
         final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+        return claimsTFunction.apply(claims);
     }
 
     private Claims extractAllClaims(String token) {

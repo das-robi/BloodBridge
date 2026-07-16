@@ -1,6 +1,7 @@
 package com.robindas.bloodbridge.Filter;
 
 import com.robindas.bloodbridge.Services.JwtTokenServices;
+import com.robindas.bloodbridge.Services.UserDetailServices;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +25,7 @@ public class JWTFilter extends OncePerRequestFilter {
     private JwtTokenServices jwtTokenServices;
 
     @Autowired
-    private ApplicationContext context;
+    ApplicationContext context;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -40,7 +41,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null){
 
-            UserDetails userDetails = context.getBean(UserDetailsService.class).loadUserByUsername(username);
+            UserDetails userDetails = context.getBean(UserDetailServices.class).loadUserByUsername(username);
 
             if (jwtTokenServices.validateToken(token, userDetails)){
                 UsernamePasswordAuthenticationToken authToken =
