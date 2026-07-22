@@ -28,12 +28,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody LoginRequest request){
+    public String loginUser(@RequestBody LoginRequest request){
         System.out.println("Login API HIT");
         System.out.println("Usrename: " +  request.getUserName());
         System.out.println("Useremail: " + request.getUserEmail());
         System.out.println("Password: " + request.getPassWord());
-       return new ResponseEntity<>(userServices.verifyUser(request), HttpStatus.OK);
+       return userServices.verifyUser(request);
     }
 
 }
