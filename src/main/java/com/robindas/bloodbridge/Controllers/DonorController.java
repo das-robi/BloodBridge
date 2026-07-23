@@ -7,6 +7,7 @@ import com.robindas.bloodbridge.DTO.DonorResponse;
 import com.robindas.bloodbridge.Model.BloodRequest;
 import com.robindas.bloodbridge.Model.Donor;
 import com.robindas.bloodbridge.Services.DonorService;
+import com.robindas.bloodbridge.Util.ResponseStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,6 +55,12 @@ public class DonorController {
     public ResponseEntity<BldReqResponse> requestForBlood(@RequestBody BldReqDTO bldReqDTO){
 
         return new ResponseEntity<>(donorService.requestForBlood(bldReqDTO), HttpStatus.CREATED);
+    }
+
+    //Update blood Request status
+    @PutMapping("/update-status/{id}")
+    public ResponseEntity<BloodRequest> updateRequestStatus(@PathVariable int id, @RequestBody ResponseStatus status){
+        return new ResponseEntity<>(donorService.updateRequestStatus(id, status), HttpStatus.OK);
     }
 
 }

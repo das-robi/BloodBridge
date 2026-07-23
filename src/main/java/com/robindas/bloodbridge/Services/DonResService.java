@@ -35,6 +35,9 @@ public class DonResService {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    DonorService donorService;
+
 
     //Blood Request Accepted
     public String requestAccepted(int requestId) {
@@ -51,16 +54,24 @@ public class DonResService {
         //check bloodRequest
         BloodRequest bloodRequest = bloodRequestRepo.findById(requestId).orElseThrow(()-> new RuntimeException("Blood Request not found"));
 
-        //Check if already accept request
-        if (bloodRequest.getStatus() == ResponseStatus.Accepted){
-            throw new RuntimeException("Blood Request is already accepted by: " + donor.getUsers().getUserName());
-        }
-
         //Check if already accept
         if (donResRepository.existsByBloodRequestAndDonor(bloodRequest, donor)){
             return "You already accepted the request.";
         }
 
+        if (donorRepository.findByUsers(users) == null){
+            return "You don't have donor Id";
+        }
+
+        //Check if already accept request
+        if (bloodRequest.getStatus() == ResponseStatus.Accepted){
+//            throw new RuntimeException("Blood Request is already accepted by: " + donor.getUsers().getUserName());
+            return "Blood Request is already accepted";
+        }
+
+
+
+        //save DonationResponse
             DonationResponse response = new DonationResponse();
 
             response.setBloodRequest(bloodRequest);
@@ -69,6 +80,13 @@ public class DonResService {
             response.setResponseTime(LocalDate.from(LocalDateTime.now()));
 
             donResRepository.save(response);
+
+
+            //Updated Blood Request status
+            donorService.updateRequestStatus(
+                    bloodRequest.getBldId(),
+                    ResponseStatus.Accepted
+            );
 
 
         notificationService.createNotificationForAccept(
@@ -104,6 +122,12 @@ public class DonResService {
         response.setResponseTime(LocalDate.from(LocalDateTime.now()));
 
         donResRepository.save(response);
+
+        //updated Request
+        donorService.updateRequestStatus(
+                bloodRequest.getBldId(),
+                ResponseStatus.Rejected
+        );
 
         return "Blood Request Rejected";
     }

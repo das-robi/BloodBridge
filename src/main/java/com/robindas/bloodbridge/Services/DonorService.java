@@ -5,6 +5,7 @@ import com.robindas.bloodbridge.DTO.BldReqResponse;
 import com.robindas.bloodbridge.DTO.DonorRequest;
 import com.robindas.bloodbridge.DTO.DonorResponse;
 import com.robindas.bloodbridge.Model.BloodRequest;
+import com.robindas.bloodbridge.Model.DonationResponse;
 import com.robindas.bloodbridge.Model.Donor;
 import com.robindas.bloodbridge.Model.Users;
 import com.robindas.bloodbridge.Repositories.BloodRequestRepo;
@@ -214,6 +215,21 @@ public class DonorService {
         }
 
         return response;
+    }
+
+    //Update Request Status
+    public BloodRequest updateRequestStatus(int id, ResponseStatus status) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Users users = usersRepository.getUserByUserName(username);
+
+        BloodRequest bloodRequest = bldRepository.findById(id).orElseThrow(()-> new RuntimeException("Blood request not found"));
+
+        bloodRequest.setStatus(status);
+
+        return bldRepository.save(bloodRequest);
+
     }
 
 }
