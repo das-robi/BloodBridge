@@ -5,21 +5,24 @@ import com.robindas.bloodbridge.Model.Users;
 import com.robindas.bloodbridge.Services.UserServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     @Autowired
     private UserServices userServices;
 
-    @GetMapping("/users/profile/{id}")
-    public ResponseEntity<Users> getProfile(int id){
-        return ResponseEntity.ok(userServices.getProfileById(id));
+    @PreAuthorize("hasAnyRole('USER','DONOR')")
+    @GetMapping("/profile")
+    public ResponseEntity<Users> getProfile(){
+        return ResponseEntity.ok(userServices.getProfileById());
     }
 
-    @PutMapping("/users/profile/update/{id}")
+    @PreAuthorize("hasAnyRole('USER','DONOR')")
+    @PutMapping("/profile/update/{id}")
     public Users updateProfile(@PathVariable int id, @RequestBody UserResponse response){
         return userServices.userUpdateProfile(id, response);
     }

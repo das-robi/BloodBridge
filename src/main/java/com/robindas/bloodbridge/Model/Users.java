@@ -1,9 +1,7 @@
 package com.robindas.bloodbridge.Model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.robindas.bloodbridge.Util.Role;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -16,6 +14,8 @@ public class Users {
     private String userName;
     private String passWord;
     private String userEmail;
-    private String role;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
 }

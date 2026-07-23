@@ -5,18 +5,14 @@ import com.robindas.bloodbridge.DTO.RegisterRequest;
 import com.robindas.bloodbridge.DTO.UserResponse;
 import com.robindas.bloodbridge.Model.Users;
 import com.robindas.bloodbridge.Repositories.UsersRepository;
+import com.robindas.bloodbridge.Util.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class UserServices {
@@ -39,6 +35,7 @@ public class UserServices {
         users.setUserName(response.getUserName());
         users.setUserEmail(response.getUserEmail());
         users.setPassWord(encoder.encode(response.getPassWord()));
+        users.setRole(Role.USER);
 
         Users saveUsers = repository.save(users);
 
@@ -57,10 +54,10 @@ public class UserServices {
             return jwtTokenServices.generateKey(request.getUserName());
         }
 
-        return "User not found";
+        return "USER not found";
     }
 
-    public Users getProfileById(int id) {
+    public Users getProfileById() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -68,7 +65,9 @@ public class UserServices {
 
         Users users = repository.getUserByUserName(username);
 
-        return repository.findById(id).orElseThrow(()-> new RuntimeException("user not found"));
+
+
+        return repository.findById(users.getUserId()).orElseThrow(()-> new RuntimeException("user not found"));
     }
 
     //Update Profile

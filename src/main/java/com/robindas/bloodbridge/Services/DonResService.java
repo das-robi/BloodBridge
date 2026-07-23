@@ -36,6 +36,9 @@ public class DonResService {
     private NotificationService notificationService;
 
     @Autowired
+    private BldRequestService bldRequestService;
+
+    @Autowired
     DonorService donorService;
 
 
@@ -48,7 +51,7 @@ public class DonResService {
 
         Users users = usersRepository.getUserByUserName(username);
 
-        //check Donor profile
+        //check DONOR profile
         Donor donor = donorRepository.findByUsers(users);
 
         //check bloodRequest
@@ -83,7 +86,7 @@ public class DonResService {
 
 
             //Updated Blood Request status
-            donorService.updateRequestStatus(
+            bldRequestService.updateRequestStatus(
                     bloodRequest.getBldId(),
                     ResponseStatus.Accepted
             );
@@ -124,7 +127,7 @@ public class DonResService {
         donResRepository.save(response);
 
         //updated Request
-        donorService.updateRequestStatus(
+        bldRequestService.updateRequestStatus(
                 bloodRequest.getBldId(),
                 ResponseStatus.Rejected
         );

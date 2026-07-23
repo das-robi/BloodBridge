@@ -18,14 +18,14 @@ public class UserDetailServices implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        System.out.println("User name " + username);
+        System.out.println("USER name " + username);
 
         Users users = repository.getUserByUserName(username);
 
         if (users == null){
-            System.out.println("User Not Found");
+            System.out.println("USER Not Found");
 
-            throw new UsernameNotFoundException("User have not save in database");
+            throw new UsernameNotFoundException("USER have not save in database");
         }
 
         return new UserPrinciple(users);
