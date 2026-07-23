@@ -43,7 +43,7 @@ public class UserServices {
         Users saveUsers = repository.save(users);
 
         System.out.println("Saved Users Id: " + saveUsers.getUserId());
-//
+
        return saveUsers;
     }
 
@@ -80,7 +80,7 @@ public class UserServices {
         Users users = repository.getUserByUserName(username);
 
 
-        Users existingUsers = repository.findById(id).orElseThrow(()-> new RuntimeException("User not found"));
+        Users existingUsers = repository.findById(id).orElseThrow(()-> new RuntimeException("Something went wrong"));
 
         //Update data
         existingUsers.setUserName(response.getUserName());

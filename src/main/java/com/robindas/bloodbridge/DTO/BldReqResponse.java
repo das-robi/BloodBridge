@@ -1,5 +1,8 @@
 package com.robindas.bloodbridge.DTO;
 
+import com.robindas.bloodbridge.Util.ResponseStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Data;
 
 @Data
@@ -12,6 +15,8 @@ public class BldReqResponse {
     private String hospital;
     private String unit;
     private String disease;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    private ResponseStatus status;
 
 }

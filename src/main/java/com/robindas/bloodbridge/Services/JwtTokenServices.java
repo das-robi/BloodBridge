@@ -21,7 +21,7 @@ import javax.crypto.SecretKey;
 @Service
 public class JwtTokenServices {
 
-    private String secreteKey = "";
+    private String secreteKey = " ";
 
 
     public JwtTokenServices() {
@@ -45,7 +45,7 @@ public class JwtTokenServices {
                 .add(claims)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 30))
+                .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 5))
                 .and()
                 .signWith(getKeys())
                 .compact();

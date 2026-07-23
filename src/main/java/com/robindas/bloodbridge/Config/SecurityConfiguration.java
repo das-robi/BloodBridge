@@ -30,8 +30,9 @@ public class SecurityConfiguration {
     @Autowired
     private JWTFilter jwtFilter;
 
-    public SecurityConfiguration(UserDetailsService userDetailsService) {
+    public SecurityConfiguration(UserDetailsService userDetailsService, JWTFilter jwtFilter) {
         this.userDetailsService = userDetailsService;
+        this.jwtFilter = jwtFilter;
     }
 
     @Bean
@@ -40,10 +41,10 @@ public class SecurityConfiguration {
         httpSecurity
                 .csrf(Customizer -> Customizer.disable())
                 .authorizeHttpRequests(request -> request.
-                        requestMatchers("/api/v1/auth/register", "/api/v1/auth/login").permitAll()
-                        .requestMatchers("/swagger-ui/**",
+                        requestMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/swagger-ui/**",
                                 "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())
+                .authenticationProvider(authenticationProvider())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 //                .httpBasic(Customizer.withDefaults());

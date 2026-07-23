@@ -14,6 +14,9 @@ public class Notification {
     private String notMessage;
     private boolean isRead;
 
+    private String bloodgrp;
+    private String usernameDonor;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private Users users;

@@ -1,5 +1,6 @@
 package com.robindas.bloodbridge.Model;
 
+import com.robindas.bloodbridge.Util.ResponseStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,7 +19,9 @@ public class BloodRequest {
     private String hospital;
     private String unit;
     private String disease;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    private ResponseStatus status;
 
 //    @ManyToMany
 //    @JoinColumn(name = "create_by")

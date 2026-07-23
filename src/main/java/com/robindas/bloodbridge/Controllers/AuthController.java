@@ -30,9 +30,11 @@ public class AuthController {
     @PostMapping("/login")
     public String loginUser(@RequestBody LoginRequest request){
         System.out.println("Login API HIT");
+
         System.out.println("Usrename: " +  request.getUserName());
         System.out.println("Useremail: " + request.getUserEmail());
         System.out.println("Password: " + request.getPassWord());
+
        return userServices.verifyUser(request);
     }
 

@@ -18,6 +18,7 @@ public class NotificationService {
     public void createNotification(String notTitle, String notMessage, Users users, BloodRequest bloodRequest){
 
         Notification notification = new Notification();
+
         notification.setNotTitle(notTitle);
         notification.setNotMessage(notMessage);
         notification.setUsers(users);
@@ -34,5 +35,14 @@ public class NotificationService {
 
 
 
+    }
+
+    public void createNotificationForAccept(String title, String message, String bloodRequest, String users) {
+        Notification notification = new Notification();
+
+        notification.setNotTitle(title);
+        notification.setNotMessage(message);
+        notification.setBloodgrp(bloodRequest);
+        notification.setUsernameDonor(users);
     }
 }

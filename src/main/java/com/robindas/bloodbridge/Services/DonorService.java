@@ -10,6 +10,7 @@ import com.robindas.bloodbridge.Model.Users;
 import com.robindas.bloodbridge.Repositories.BloodRequestRepo;
 import com.robindas.bloodbridge.Repositories.DonorRepository;
 import com.robindas.bloodbridge.Repositories.UsersRepository;
+import com.robindas.bloodbridge.Util.ResponseStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,7 +39,7 @@ public class DonorService {
 
         System.out.println("Users Details: " + users);
 
-        Donor donor = donorRepository.getDonorByUsers(users);
+        Donor donor = donorRepository.findByUsers(users);
 
         if (donor == null){
 
@@ -64,7 +65,7 @@ public class DonorService {
         String username = authentication.getName();
 
         Users users = usersRepository.getUserByUserName(username);
-        Donor existDonor = donorRepository.getDonorByUsers(users);
+        Donor existDonor = donorRepository.findByUsers(users);
 
         if (existDonor != null){
             throw new RuntimeException("You have already a Donor profile");
@@ -107,7 +108,7 @@ public class DonorService {
 
         Users users = usersRepository.getUserByUserName(username);
 
-        Donor donor = donorRepository.getDonorByUsers(users);
+        Donor donor = donorRepository.findByUsers(users);
 
 //        donor.setDonId(request.);
         donor.setCity(request.getCity());
@@ -138,7 +139,7 @@ public class DonorService {
         String username = authentication.getName();
         Users users = usersRepository.getUserByUserName(username);
 
-        Donor donor = donorRepository.getDonorByUsers(users);
+        Donor donor = donorRepository.findByUsers(users);
 
         System.out.println("Donor user: " + donor);
 
@@ -164,7 +165,7 @@ public class DonorService {
         saveRequest.setDisease(bldReqDTO.getDisease());
         saveRequest.setHospital(bldReqDTO.getHospital());
         saveRequest.setUnit(bldReqDTO.getUnit());
-        saveRequest.setStatus("Pending");
+        saveRequest.setStatus(ResponseStatus.Pending);
 
         saveRequest.setCreatedBy(users);
 
@@ -185,7 +186,7 @@ public class DonorService {
         response.setUnit(saveRequest.getUnit());
         response.setDistrict(saveRequest.getDistrict());
         response.setCity(saveRequest.getCity());
-        response.setStatus(saveRequest.getStatus());
+        response.setStatus(ResponseStatus.Pending);
 
         System.out.println("Finding All Donor: " + donor.size());
 

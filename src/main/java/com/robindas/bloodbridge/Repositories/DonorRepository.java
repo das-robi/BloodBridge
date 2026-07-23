@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface DonorRepository extends JpaRepository<Donor, Integer> {
-    Donor getDonorByUsers(Users users);
+    Donor findByUsers(Users users);
 
     List<Donor> findByBldGroupAndDistrict(String bldGroup, String district);
 }
