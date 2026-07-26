@@ -1,7 +1,9 @@
 package com.robindas.bloodbridge.Services;
 
-import com.robindas.bloodbridge.DTO.DonorRequest;
-import com.robindas.bloodbridge.DTO.DonorResponse;
+import com.robindas.bloodbridge.DTO.Users.DonorRequest;
+import com.robindas.bloodbridge.DTO.Users.DonorResponse;
+import com.robindas.bloodbridge.Exceptions.BadRequestException;
+import com.robindas.bloodbridge.Exceptions.ResourceNotFoundException;
 import com.robindas.bloodbridge.Model.Donor;
 import com.robindas.bloodbridge.Model.Users;
 import com.robindas.bloodbridge.Repositories.DonorRepository;
@@ -9,8 +11,6 @@ import com.robindas.bloodbridge.Repositories.UsersRepository;
 import com.robindas.bloodbridge.Util.Role;
 import com.robindas.bloodbridge.Util.UserAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -42,7 +42,7 @@ public class DonorService {
 
         if (donor == null){
 
-            throw new RuntimeException("Don't have your DONOR account");
+            throw new ResourceNotFoundException("Don't have your DONOR account");
         }
 
         DonorResponse response = new DonorResponse();
@@ -74,7 +74,7 @@ public class DonorService {
         Donor existDonor = donorRepository.findByUsers(users);
 
         if (existDonor != null){
-            throw new RuntimeException("You have already a DONOR profile");
+            throw new BadRequestException("You have already a DONOR profile");
         }
 
         Donor donor = new Donor();
@@ -121,11 +121,26 @@ public class DonorService {
 
         Donor donor = donorRepository.findByUsers(users);
 
-//        donor.setDonId(request.);
-        donor.setCity(request.getCity());
-        donor.setPhone(request.getPhone());
-        donor.setDistrict(request.getDistrict());
-        donor.setLastDonateDate(request.getLastDonateDate());
+
+        if (donor == null) {
+            throw new ResourceNotFoundException("Donor profile not found.");
+        }
+
+        if (request.getCity() != null) {
+            donor.setCity(request.getCity());
+        }
+
+        if (request.getDistrict() != null) {
+            donor.setDistrict(request.getDistrict());
+        }
+
+        if (request.getPhone() != null) {
+            donor.setPhone(request.getPhone());
+        }
+
+        if (request.getLastDonateDate() != null) {
+            donor.setLastDonateDate(request.getLastDonateDate());
+        }
 
         System.out.println("USER Update: " + donor);
 

@@ -1,7 +1,7 @@
 package com.robindas.bloodbridge.Controllers;
 
-import com.robindas.bloodbridge.DTO.UserResponse;
-import com.robindas.bloodbridge.Model.Users;
+import com.robindas.bloodbridge.DTO.Users.UserRequest;
+import com.robindas.bloodbridge.DTO.Users.UserResponse;
 import com.robindas.bloodbridge.Services.UserServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +22,9 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyRole('USER','DONOR')")
-    @PutMapping("/profile/me/{id}")
-    public Users updateProfile(@PathVariable int id, @RequestBody UserResponse response){
-        return userServices.userUpdateProfile(id, response);
+    @PutMapping("/me")
+    public UserResponse updateProfile(@RequestBody UserRequest request){
+        return userServices.userUpdateProfile(request);
     }
 
 }

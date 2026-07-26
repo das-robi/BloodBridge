@@ -1,13 +1,8 @@
 package com.robindas.bloodbridge.Controllers;
 
-import com.robindas.bloodbridge.DTO.BldReqDTO;
-import com.robindas.bloodbridge.DTO.BldReqResponse;
-import com.robindas.bloodbridge.DTO.DonorRequest;
-import com.robindas.bloodbridge.DTO.DonorResponse;
-import com.robindas.bloodbridge.Model.BloodRequest;
-import com.robindas.bloodbridge.Model.Donor;
+import com.robindas.bloodbridge.DTO.Users.DonorRequest;
+import com.robindas.bloodbridge.DTO.Users.DonorResponse;
 import com.robindas.bloodbridge.Services.DonorService;
-import com.robindas.bloodbridge.Util.ResponseStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +29,7 @@ public class DonorController {
     }
 
     @PreAuthorize("hasAnyRole('DONOR','USER')")
-    @PutMapping("/donor/me")
+    @PutMapping("/me")
     public ResponseEntity<DonorResponse> updateProfile(@RequestBody DonorRequest request){
 
         return new ResponseEntity<>(donorService.updateProfile(request), HttpStatus.OK);
@@ -42,7 +37,7 @@ public class DonorController {
 
 
     @PreAuthorize("hasAnyRole('DONOR','USER')")
-    @DeleteMapping("/me")
+    @DeleteMapping("/delete")
     public String deleteDonorProfile(){
         donorService.deleteDonorProfile();
 

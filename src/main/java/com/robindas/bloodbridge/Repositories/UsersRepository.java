@@ -1,6 +1,5 @@
 package com.robindas.bloodbridge.Repositories;
 
-import com.robindas.bloodbridge.DTO.UserResponse;
 import com.robindas.bloodbridge.Model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

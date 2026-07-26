@@ -1,5 +1,7 @@
 package com.robindas.bloodbridge.Services;
 
+import com.robindas.bloodbridge.Exceptions.BadRequestException;
+import com.robindas.bloodbridge.Exceptions.ResourceNotFoundException;
 import com.robindas.bloodbridge.Model.Users;
 import com.robindas.bloodbridge.Repositories.UsersRepository;
 import com.robindas.bloodbridge.Util.UserPrinciple;
@@ -25,7 +27,7 @@ public class UserDetailServices implements UserDetailsService {
         if (users == null){
             System.out.println("USER Not Found");
 
-            throw new UsernameNotFoundException("USER have not save in database");
+            throw new BadRequestException("Username & Password Invalid");
         }
 
         return new UserPrinciple(users);

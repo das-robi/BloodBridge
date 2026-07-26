@@ -2,6 +2,7 @@ package com.robindas.bloodbridge.Services;
 
 import com.robindas.bloodbridge.DTO.BldReqDTO;
 import com.robindas.bloodbridge.DTO.BldReqResponse;
+import com.robindas.bloodbridge.Exceptions.ResourceNotFoundException;
 import com.robindas.bloodbridge.Model.BloodRequest;
 import com.robindas.bloodbridge.Model.Donor;
 import com.robindas.bloodbridge.Model.Users;
@@ -114,7 +115,7 @@ public class BldRequestService {
 //        String username = authentication.getName();
         Users users = userAuthentication.getUserAuthenticated();
 
-        BloodRequest bloodRequest = bloodRequestRepo.findById(id).orElseThrow(()-> new RuntimeException("Blood request not found"));
+        BloodRequest bloodRequest = bloodRequestRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Blood request not found"));
 
         bloodRequest.setStatus(status);
 
@@ -126,7 +127,7 @@ public class BldRequestService {
 
         userAuthentication.getUserAuthenticated();
 
-        return bloodRequestRepo.findById(id).orElseThrow(()-> new RuntimeException("Not found "));
+        return bloodRequestRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Not found "));
     }
 
     public List<BldReqResponse> getAllRequests() {
@@ -161,7 +162,7 @@ public class BldRequestService {
 
         userAuthentication.getUserAuthenticated();
 
-        BloodRequest request = bloodRequestRepo.findById(id).orElseThrow(()-> new RuntimeException("Blood Request not found"));
+        BloodRequest request = bloodRequestRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Blood Request not found"));
         System.out.println("Blood Request Details: " + request.getRequesterName());
 
         bloodRequestRepo.delete(request);

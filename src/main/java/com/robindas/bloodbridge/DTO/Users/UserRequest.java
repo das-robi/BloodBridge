@@ -1,16 +1,13 @@
-package com.robindas.bloodbridge.DTO;
+package com.robindas.bloodbridge.DTO.Users;
 
-public class UserResponse {
+public class UserRequest {
 
     private String userName;
     private String userEmail;
 
-    public UserResponse(String userName, String userEmail) {
+    public UserRequest(String userName, String userEmail) {
         this.userName = userName;
         this.userEmail = userEmail;
-    }
-
-    public UserResponse() {
     }
 
     public String getUserName() {

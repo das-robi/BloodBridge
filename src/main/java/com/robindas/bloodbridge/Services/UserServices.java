@@ -1,9 +1,16 @@
 package com.robindas.bloodbridge.Services;
 
 import com.robindas.bloodbridge.DTO.*;
+import com.robindas.bloodbridge.DTO.LoginRequest;
+import com.robindas.bloodbridge.DTO.RegisterRequest;
+import com.robindas.bloodbridge.DTO.Users.DonorResponse;
+import com.robindas.bloodbridge.DTO.Users.UserRequest;
+import com.robindas.bloodbridge.DTO.Users.UserResponse;
+import com.robindas.bloodbridge.Exceptions.BadRequestException;
+import com.robindas.bloodbridge.Exceptions.ForbiddenException;
+import com.robindas.bloodbridge.Exceptions.ResourceNotFoundException;
 import com.robindas.bloodbridge.Model.BloodRequest;
 import com.robindas.bloodbridge.Model.Donor;
-import com.robindas.bloodbridge.Model.Notification;
 import com.robindas.bloodbridge.Model.Users;
 import com.robindas.bloodbridge.Repositories.BloodRequestRepo;
 import com.robindas.bloodbridge.Repositories.DonorRepository;
@@ -78,9 +85,12 @@ public class UserServices {
         if (authentication.isAuthenticated()){
             return jwtTokenServices.generateKey(request.getUserName());
         }
-
-        return "USER not found";
+        else {
+            throw new BadRequestException("Invalid your password and name");
+        }
     }
+
+
 
     public UserResponse getProfileById() {
 
@@ -92,7 +102,7 @@ public class UserServices {
 
         UserResponse userResponse = new UserResponse();
 
-        repository.findById(users.getUserId()).orElseThrow(()-> new RuntimeException("user not found"));
+        repository.findById(users.getUserId()).orElseThrow(()-> new ResourceNotFoundException("User not found"));
 
         userResponse.setUserName(users.getUserName());
         userResponse.setUserEmail(users.getUserEmail());
@@ -102,23 +112,49 @@ public class UserServices {
     }
 
     //Update Profile
-    public Users userUpdateProfile(int id, UserResponse response) {
+    public UserResponse userUpdateProfile(UserRequest request) {
 
         //check Authentication
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 //        String username = authentication.getName();
 //        Users users = repository.getUserByUserName(username);
-        userAuthentication.getUserAuthenticated();
+        Users users = userAuthentication.getUserAuthenticated();
 
 
-        Users existingUsers = repository.findById(id).orElseThrow(()-> new RuntimeException("Something went wrong"));
 
         //Update data
-        existingUsers.setUserName(response.getUserName());
-        existingUsers.setUserEmail(response.getUserEmail());
+
+        if (request.getUserEmail() == null && request.getUserName() != null){
+            users.setUserName(request.getUserName());
+            users.setUserEmail(users.getUserEmail());
+        }
+        else if (request.getUserName() == null && request.getUserEmail() != null){
+            users.setUserName(request.getUserName());
+            users.setUserEmail(request.getUserEmail());
+        }
+        else if (request.getUserName() != null && request.getUserEmail() != null){
+            users.setUserName(request.getUserName());
+            users.setUserEmail(request.getUserEmail());
+        }
+        else {
+            throw new BadRequestException("Can't update");
+        }
+
+//        Users existingusers = usersRepository.findById(users.getUserId()).orElseThrow(()-> new ResourceNotFoundException("User not found"));
+//
+//        existingusers.setUserName(request.getUserName());
+//        existingusers.setUserEmail(request.getUserEmail());
+
+        usersRepository.save(users);
+
+        //Convert into Response
+        UserResponse response = new UserResponse();
+
+        response.setUserName(users.getUserName());
+        response.setUserEmail(users.getUserEmail());
 
 
-        return repository.save(existingUsers);
+        return response;
     }
 
 
@@ -131,7 +167,11 @@ public class UserServices {
     //Admin
     public List<UserResponse> getAllUsers() {
 
-        userAuthentication.getUserAuthenticated();
+        Users usersAuth = userAuthentication.getUserAuthenticated();
+
+        if (usersAuth.getRole() != Role.ADMIN){
+            throw new ForbiddenException("Only admins can perform this action.");
+        }
 
         List<Users> users = usersRepository.findAll();
         List<UserResponse> responses = new ArrayList<>();

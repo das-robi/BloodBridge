@@ -1,8 +1,8 @@
 package com.robindas.bloodbridge.Controllers;
 
 import com.robindas.bloodbridge.DTO.BldReqResponse;
-import com.robindas.bloodbridge.DTO.DonorResponse;
-import com.robindas.bloodbridge.DTO.UserResponse;
+import com.robindas.bloodbridge.DTO.Users.DonorResponse;
+import com.robindas.bloodbridge.DTO.Users.UserResponse;
 import com.robindas.bloodbridge.Services.UserServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

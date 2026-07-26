@@ -1,4 +1,4 @@
-package com.robindas.bloodbridge.DTO;
+package com.robindas.bloodbridge.DTO.Users;
 
 import java.time.LocalDate;
 

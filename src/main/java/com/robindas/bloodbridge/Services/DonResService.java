@@ -1,5 +1,8 @@
 package com.robindas.bloodbridge.Services;
 
+import com.robindas.bloodbridge.Exceptions.BadRequestException;
+import com.robindas.bloodbridge.Exceptions.ForbiddenException;
+import com.robindas.bloodbridge.Exceptions.ResourceNotFoundException;
 import com.robindas.bloodbridge.Model.BloodRequest;
 import com.robindas.bloodbridge.Model.DonationResponse;
 import com.robindas.bloodbridge.Model.Donor;
@@ -9,6 +12,7 @@ import com.robindas.bloodbridge.Repositories.DonResRepository;
 import com.robindas.bloodbridge.Repositories.DonorRepository;
 import com.robindas.bloodbridge.Repositories.UsersRepository;
 import com.robindas.bloodbridge.Util.ResponseStatus;
+import com.robindas.bloodbridge.Util.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -57,13 +61,13 @@ public class DonResService {
         //check bloodRequest
         BloodRequest bloodRequest = bloodRequestRepo.findById(requestId).orElseThrow(()-> new RuntimeException("Blood Request not found"));
 
+        if (donor == null){
+            throw new ForbiddenException("Only donor can accept the request");
+        }
+
         //Check if already accept
         if (donResRepository.existsByBloodRequestAndDonor(bloodRequest, donor)){
             return "You already accepted the request.";
-        }
-
-        if (donorRepository.findByUsers(users) == null){
-            return "You don't have donor Id";
         }
 
         //Check if already accept request
@@ -92,12 +96,13 @@ public class DonResService {
             );
 
 
-        notificationService.createNotificationForAccept(
-                "Blood Request Status Accepted",
-                donor.getUsers().getUserName() + "has accept your blood donation request",
-                bloodRequest.getBldGroup(),
-                donor.getUsers().getUserName()
-        );
+
+            notificationService.createNotificationForAccept(
+                    "Blood Request Status Accepted",
+                    donor.getUsers().getUserName() + "has accept your blood donation request",
+                    bloodRequest.getBldGroup(),
+                    donor.getUsers().getUserName()
+            );
 
         return "Blood Request Accepted";
     }
@@ -111,10 +116,10 @@ public class DonResService {
 
         Donor donor = donorRepository.findByUsers(users);
 
-        BloodRequest bloodRequest = bloodRequestRepo.findById(requestId).orElseThrow(()-> new RuntimeException("Blood Request not found"));
+        BloodRequest bloodRequest = bloodRequestRepo.findById(requestId).orElseThrow(()-> new ResourceNotFoundException("Blood Request not found"));
 
         if (donResRepository.existsByBloodRequestAndDonor(bloodRequest, donor)){
-            return "You already rejected the request";
+            throw new BadRequestException("You already rejected the request");
         }
 
         DonationResponse response = new DonationResponse();

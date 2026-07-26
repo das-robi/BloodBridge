@@ -27,7 +27,7 @@ public class BldRequestController {
     }
 
     //Update blood Request status
-    @PutMapping("/{id}")
+    @PutMapping("/{id}/status")
     public ResponseEntity<BloodRequest> updateRequestStatus(@PathVariable int id, @RequestBody ResponseStatus status){
         return new ResponseEntity<>(bldRequestService.updateRequestStatus(id, status), HttpStatus.OK);
     }
