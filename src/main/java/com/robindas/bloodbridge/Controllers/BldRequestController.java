@@ -8,27 +8,47 @@ import com.robindas.bloodbridge.Util.ResponseStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/v1/blood_request")
+@RequestMapping("/api/v1/blood-request")
 public class BldRequestController {
 
     @Autowired
     private BldRequestService bldRequestService;
 
     //Request for Blood
-    @PostMapping("/create_request")
+    @PostMapping("/create")
     public ResponseEntity<BldReqResponse> requestForBlood(@RequestBody BldReqDTO bldReqDTO){
 
         return new ResponseEntity<>(bldRequestService.requestForBlood(bldReqDTO), HttpStatus.CREATED);
     }
 
     //Update blood Request status
-    @PutMapping("/update_status/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<BloodRequest> updateRequestStatus(@PathVariable int id, @RequestBody ResponseStatus status){
         return new ResponseEntity<>(bldRequestService.updateRequestStatus(id, status), HttpStatus.OK);
     }
+
+    //Get All BloodRequest
+    @GetMapping("/{id}")
+    public ResponseEntity<BloodRequest> getRequest(@PathVariable int id){
+        return ResponseEntity.ok(bldRequestService.getRequests(id));
+    }
+
+    //Get All BloodRequest
+    @GetMapping("/all")
+    public ResponseEntity<List<BldReqResponse>> getAllRequest(){
+        return ResponseEntity.ok(bldRequestService.getAllRequests());
+    }
+
+//    Get All BloodRequest
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteRequest(@PathVariable int id){
+        return ResponseEntity.ok(bldRequestService.deleteRequest(id));
+    }
+
 
 }

@@ -1,18 +1,13 @@
 package com.robindas.bloodbridge.Controllers;
 
-import com.robindas.bloodbridge.Model.BloodRequest;
-import com.robindas.bloodbridge.Model.Donor;
-import com.robindas.bloodbridge.Model.Users;
-import com.robindas.bloodbridge.Services.AdminService;
-import com.robindas.bloodbridge.Services.BldRequestService;
-import com.robindas.bloodbridge.Services.DonorService;
+import com.robindas.bloodbridge.DTO.BldReqResponse;
+import com.robindas.bloodbridge.DTO.DonorResponse;
+import com.robindas.bloodbridge.DTO.UserResponse;
 import com.robindas.bloodbridge.Services.UserServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,36 +16,31 @@ import java.util.List;
 public class AdminController {
 
     @Autowired
-    private AdminService adminService;
-
-    @Autowired
     private UserServices userServices;
 
-    @Autowired
-    private DonorService donorService;
-
-    @Autowired
-    private BldRequestService bldRequestService;
-
-
-
-
-    @GetMapping("/all_users")
+    //Users
+    @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<Users>> getAllUsers(){
-        return ResponseEntity.ok(adminService.getAllUsers());
+    public ResponseEntity<List<UserResponse>> getAllUsers(){
+        return ResponseEntity.ok(userServices.getAllUsers());
     }
 
-    @GetMapping("/all_donors")
+//    @GetMapping("/user/view_id:{id}_request_id:{reqId}")
+//    public ResponseEntity<String> deleteRequest(@PathVariable int id, @PathVariable int reqId){
+//        return new ResponseEntity<>(userServices.deleteRequest(id, reqId),HttpStatus.OK);
+//    }
+
+    @GetMapping("/donors")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<Donor>> getAllDonor(){
-        return ResponseEntity.ok(adminService.getAllDonor());
+    public ResponseEntity<List<DonorResponse>> getAllDonor(){
+        return ResponseEntity.ok(userServices.getAllDonor());
     }
 
 
-    @GetMapping("/all_blood_request")
+    @GetMapping("/blood-request")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<BloodRequest>> getAllBloodReq(){
-        return ResponseEntity.ok(adminService.getAllBloodReq());
+    public ResponseEntity<List<BldReqResponse>> getAllBloodReq(){
+        return ResponseEntity.ok(userServices.getAllBloodReq());
     }
+
 }

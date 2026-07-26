@@ -7,14 +7,13 @@ import com.robindas.bloodbridge.Model.Donor;
 import com.robindas.bloodbridge.Model.Users;
 import com.robindas.bloodbridge.Repositories.BloodRequestRepo;
 import com.robindas.bloodbridge.Repositories.DonorRepository;
-import com.robindas.bloodbridge.Repositories.NotificationRepo;
 import com.robindas.bloodbridge.Repositories.UsersRepository;
 import com.robindas.bloodbridge.Util.ResponseStatus;
+import com.robindas.bloodbridge.Util.UserAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,15 +31,18 @@ public class BldRequestService {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private UserAuthentication userAuthentication;
+
 
 
     //Saving Users BloodRequest and Matching Request Blood Group and District
     public BldReqResponse requestForBlood(BldReqDTO bldReqDTO) {
 
         //Check USER is Logged-In
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Users users = usersRepository.getUserByUserName(username);
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String username = authentication.getName();
+        Users users = userAuthentication.getUserAuthenticated();
 
         //Set users saveRequest into BloodRequest Entity
         BloodRequest saveRequest = new BloodRequest();
@@ -53,6 +55,7 @@ public class BldRequestService {
         saveRequest.setHospital(bldReqDTO.getHospital());
         saveRequest.setUnit(bldReqDTO.getUnit());
         saveRequest.setStatus(ResponseStatus.Pending);
+        saveRequest.setRequesterName(users.getUserName());
 
         saveRequest.setCreatedBy(users);
 
@@ -74,6 +77,7 @@ public class BldRequestService {
         response.setDistrict(saveRequest.getDistrict());
         response.setCity(saveRequest.getCity());
         response.setStatus(ResponseStatus.Pending);
+        response.setRequesterName(saveRequest.getRequesterName());
 
         System.out.println("Finding All DONOR: " + donor.size());
 
@@ -105,10 +109,10 @@ public class BldRequestService {
 
     //Update Request Status
     public BloodRequest updateRequestStatus(int id, ResponseStatus status) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Users users = usersRepository.getUserByUserName(username);
+//
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String username = authentication.getName();
+        Users users = userAuthentication.getUserAuthenticated();
 
         BloodRequest bloodRequest = bloodRequestRepo.findById(id).orElseThrow(()-> new RuntimeException("Blood request not found"));
 
@@ -117,4 +121,52 @@ public class BldRequestService {
         return bloodRequestRepo.save(bloodRequest);
 
     }
+
+    public BloodRequest getRequests(int id) {
+
+        userAuthentication.getUserAuthenticated();
+
+        return bloodRequestRepo.findById(id).orElseThrow(()-> new RuntimeException("Not found "));
+    }
+
+    public List<BldReqResponse> getAllRequests() {
+
+        userAuthentication.getUserAuthenticated();
+
+        List<BloodRequest> bloodRequests = bloodRequestRepo.findAll();
+        List<BldReqResponse> reqResponses = new ArrayList<>();
+
+        for (BloodRequest request : bloodRequests){
+
+            BldReqResponse response = new BldReqResponse();
+
+            response.setPatientName(request.getPatientName());
+            response.setBldGroup(request.getBldGroup());
+            response.setDisease(request.getDisease());
+            response.setStatus(request.getStatus());
+            response.setHospital(request.getHospital());
+            response.setUnit(request.getUnit());
+            response.setDistrict(request.getDistrict());
+            response.setCity(request.getCity());
+            response.setRequesterName(request.getCreatedBy().getUserName());
+
+            reqResponses.add(response);
+        }
+
+
+        return reqResponses;
+    }
+
+    public String deleteRequest(int id) {
+
+        userAuthentication.getUserAuthenticated();
+
+        BloodRequest request = bloodRequestRepo.findById(id).orElseThrow(()-> new RuntimeException("Blood Request not found"));
+        System.out.println("Blood Request Details: " + request.getRequesterName());
+
+        bloodRequestRepo.delete(request);
+
+        return "Deleted Success";
+    }
+
 }

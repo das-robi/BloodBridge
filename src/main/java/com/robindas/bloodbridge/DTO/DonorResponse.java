@@ -4,7 +4,8 @@ import java.time.LocalDate;
 
 public class DonorResponse {
 
-    private Integer donId;
+//    private Integer donId;
+    private String donorName;
     private String bldGroup;
     private String city;
     private String district;
@@ -12,13 +13,15 @@ public class DonorResponse {
     private LocalDate lastDonateDate;
     private boolean available;
 
-    public DonorResponse(Integer donId, String bldGroup, String city, String phone, LocalDate lastDonateDate, String district, boolean available) {
+    public DonorResponse(Integer donId, String bldGroup, String city, String phone, LocalDate lastDonateDate, String district, boolean available, String donorName) {
         this.bldGroup = bldGroup;
         this.city = city;
         this.phone = phone;
         this.lastDonateDate = lastDonateDate;
         this.available = available;
-        this.donId = donId;
+        this.district = district;
+//        this.donId = donId;
+        this.donorName = donorName;
     }
 
     public DonorResponse() {
@@ -72,11 +75,20 @@ public class DonorResponse {
         this.available = available;
     }
 
-    public Integer getDonId() {
-        return donId;
+//    public Integer getDonId() {
+//        return donId;
+//    }
+//
+//    public void setDonId(Integer donId) {
+//        this.donId = donId;
+//    }
+
+
+    public String getDonorName() {
+        return donorName;
     }
 
-    public void setDonId(Integer donId) {
-        this.donId = donId;
+    public void setDonorName(String donorName) {
+        this.donorName = donorName;
     }
 }

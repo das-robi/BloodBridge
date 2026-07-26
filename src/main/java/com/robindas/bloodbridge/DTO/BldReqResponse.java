@@ -15,6 +15,7 @@ public class BldReqResponse {
     private String hospital;
     private String unit;
     private String disease;
+    private String requesterName;
 
     @Enumerated(EnumType.STRING)
     private ResponseStatus status;

@@ -1,11 +1,15 @@
 package com.robindas.bloodbridge.Services;
 
-import com.robindas.bloodbridge.DTO.LoginRequest;
-import com.robindas.bloodbridge.DTO.RegisterRequest;
-import com.robindas.bloodbridge.DTO.UserResponse;
+import com.robindas.bloodbridge.DTO.*;
+import com.robindas.bloodbridge.Model.BloodRequest;
+import com.robindas.bloodbridge.Model.Donor;
+import com.robindas.bloodbridge.Model.Notification;
 import com.robindas.bloodbridge.Model.Users;
+import com.robindas.bloodbridge.Repositories.BloodRequestRepo;
+import com.robindas.bloodbridge.Repositories.DonorRepository;
 import com.robindas.bloodbridge.Repositories.UsersRepository;
 import com.robindas.bloodbridge.Util.Role;
+import com.robindas.bloodbridge.Util.UserAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,6 +17,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class UserServices {
@@ -24,10 +31,28 @@ public class UserServices {
     @Autowired
     private JwtTokenServices jwtTokenServices;
 
+    @Autowired
+    private UserAuthentication userAuthentication;
+
+    @Autowired
+    private UsersRepository usersRepository;
+
+    @Autowired
+    private DonorRepository donorRepository;
+
+    @Autowired
+    private BloodRequestRepo bloodRequestRepo;
+
+    @Autowired
+    private DonorService donorService;
+    @Autowired
+    private BldRequestService requestService;
 
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
 
+
+    //Users
     public Users UserRegister(RegisterRequest response) {
 
         Users users = new Users();
@@ -57,7 +82,7 @@ public class UserServices {
         return "USER not found";
     }
 
-    public Users getProfileById() {
+    public UserResponse getProfileById() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -65,18 +90,25 @@ public class UserServices {
 
         Users users = repository.getUserByUserName(username);
 
+        UserResponse userResponse = new UserResponse();
+
+        repository.findById(users.getUserId()).orElseThrow(()-> new RuntimeException("user not found"));
+
+        userResponse.setUserName(users.getUserName());
+        userResponse.setUserEmail(users.getUserEmail());
 
 
-        return repository.findById(users.getUserId()).orElseThrow(()-> new RuntimeException("user not found"));
+        return userResponse;
     }
 
     //Update Profile
     public Users userUpdateProfile(int id, UserResponse response) {
 
         //check Authentication
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Users users = repository.getUserByUserName(username);
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String username = authentication.getName();
+//        Users users = repository.getUserByUserName(username);
+        userAuthentication.getUserAuthenticated();
 
 
         Users existingUsers = repository.findById(id).orElseThrow(()-> new RuntimeException("Something went wrong"));
@@ -88,4 +120,86 @@ public class UserServices {
 
         return repository.save(existingUsers);
     }
+
+
+
+
+
+
+
+
+    //Admin
+    public List<UserResponse> getAllUsers() {
+
+        userAuthentication.getUserAuthenticated();
+
+        List<Users> users = usersRepository.findAll();
+        List<UserResponse> responses = new ArrayList<>();
+
+        for (Users users1 : users){
+            UserResponse response = new UserResponse();
+
+            response.setUserName(users1.getUserName());
+            response.setUserEmail(users1.getUserEmail());
+
+            responses.add(response);
+        }
+
+
+        return responses;
+    }
+
+    public List<DonorResponse> getAllDonor() {
+
+        userAuthentication.getUserAuthenticated();
+
+        List<Donor> donors = donorRepository.findAll();
+        List<DonorResponse> responses = new ArrayList<>();
+
+        for (Donor donors1 : donors){
+
+            DonorResponse response = new DonorResponse();
+
+            response.setDonorName(donors1.getDonorName());
+            response.setBldGroup(donors1.getBldGroup());
+            response.setCity(donors1.getCity());
+            response.setDistrict(donors1.getDistrict());
+            response.setPhone(donors1.getPhone());
+            response.setLastDonateDate(donors1.getLastDonateDate());
+            response.setAvailable(donors1.isAvailable());
+
+            responses.add(response);
+        }
+
+        return responses;
+    }
+
+    public List<BldReqResponse> getAllBloodReq() {
+
+        Users users = userAuthentication.getUserAuthenticated();
+
+        List<BloodRequest> bloodRequests = bloodRequestRepo.findAll();
+        List<BldReqResponse> reqResponses = new ArrayList<>();
+
+        for (BloodRequest request : bloodRequests){
+
+            BldReqResponse response = new BldReqResponse();
+
+            response.setPatientName(request.getPatientName());
+            response.setBldGroup(request.getBldGroup());
+            response.setStatus(request.getStatus());
+            response.setDisease(request.getDisease());
+            response.setCity(request.getCity());
+            response.setDistrict(request.getDistrict());
+            response.setHospital(request.getHospital());
+            response.setUnit(request.getUnit());
+            response.setRequesterName(request.getRequesterName());
+
+            reqResponses.add(response);
+
+        }
+
+        return reqResponses;
+    }
+
 }

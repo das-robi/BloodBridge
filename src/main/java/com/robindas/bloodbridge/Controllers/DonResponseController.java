@@ -14,12 +14,12 @@ public class DonResponseController {
     private DonResService donResService;
 
 
-    @PostMapping("/accepted/{requestId}")
+    @PostMapping("/{requestId}/accept")
     public ResponseEntity<String> requestAccepted(@PathVariable int requestId){
         return ResponseEntity.ok(donResService.requestAccepted(requestId));
     }
 
-    @PostMapping("/reject/{requestId}")
+    @PostMapping("/{requestId}/reject")
     public ResponseEntity<String> requestRejected(@PathVariable int requestId){
         return ResponseEntity.ok(donResService.requestRejected(requestId));
     }

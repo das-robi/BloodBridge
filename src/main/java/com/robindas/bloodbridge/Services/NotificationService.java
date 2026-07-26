@@ -1,5 +1,6 @@
 package com.robindas.bloodbridge.Services;
 
+import com.robindas.bloodbridge.DTO.NotificResponse;
 import com.robindas.bloodbridge.Model.BloodRequest;
 import com.robindas.bloodbridge.Model.Notification;
 import com.robindas.bloodbridge.Model.Users;
@@ -8,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class NotificationService {
@@ -43,6 +47,28 @@ public class NotificationService {
         notification.setNotTitle(title);
         notification.setNotMessage(message);
         notification.setBloodgrp(bloodRequest);
-        notification.setUsernameDonor(users);
+//        notification.setUsernameDonor(users);
+    }
+
+    public List<NotificResponse> getAllNotification() {
+
+        List<Notification> notifications = notificationRepo.findAll();
+        List<NotificResponse> responses = new ArrayList<>();
+
+        for (Notification notification : notifications){
+
+            NotificResponse response = new NotificResponse();
+
+            response.setNotTitle(notification.getNotTitle());
+            response.setNotMessage(notification.getNotMessage());
+            response.setBloodgrp(notification.getBloodgrp());
+            response.setRead(notification.isRead());
+            response.setUsernameDonor(notification.getUsernameDonor());
+
+            responses.add(response);
+        }
+
+
+        return responses;
     }
 }

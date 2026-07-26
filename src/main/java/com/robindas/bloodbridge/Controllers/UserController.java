@@ -16,13 +16,13 @@ public class UserController {
     private UserServices userServices;
 
     @PreAuthorize("hasAnyRole('USER','DONOR')")
-    @GetMapping("/profile")
-    public ResponseEntity<Users> getProfile(){
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getProfile(){
         return ResponseEntity.ok(userServices.getProfileById());
     }
 
     @PreAuthorize("hasAnyRole('USER','DONOR')")
-    @PutMapping("/profile/update/{id}")
+    @PutMapping("/profile/me/{id}")
     public Users updateProfile(@PathVariable int id, @RequestBody UserResponse response){
         return userServices.userUpdateProfile(id, response);
     }

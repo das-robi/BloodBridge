@@ -15,33 +15,34 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/donor")
+@RequestMapping("/api/v1/donors")
 public class DonorController {
 
     @Autowired
     private DonorService donorService;
 
-//    @PreAuthorize("hasRole('DONOR')")
+    @PreAuthorize("hasAnyRole('DONOR','USER')")
     @GetMapping("/me")
     public ResponseEntity<DonorResponse> donorProfile(){
         return new ResponseEntity<>(donorService.getDonorProfile(), HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('USER')")
-    @PostMapping("/create_donor")
+    @PostMapping("/me")
     public ResponseEntity<DonorResponse> createDonor(@RequestBody DonorRequest request){
         return new ResponseEntity<>(donorService.createDonor(request), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('DONOR')")
-    @PutMapping("/donor/profile_update")
-    public ResponseEntity<Donor> updateProfile(@RequestBody DonorRequest request){
+    @PreAuthorize("hasAnyRole('DONOR','USER')")
+    @PutMapping("/donor/me")
+    public ResponseEntity<DonorResponse> updateProfile(@RequestBody DonorRequest request){
+
         return new ResponseEntity<>(donorService.updateProfile(request), HttpStatus.OK);
     }
 
 
-    @PreAuthorize("hasRole('DONOR')")
-    @DeleteMapping("/delete_profile")
+    @PreAuthorize("hasAnyRole('DONOR','USER')")
+    @DeleteMapping("/me")
     public String deleteDonorProfile(){
         donorService.deleteDonorProfile();
 

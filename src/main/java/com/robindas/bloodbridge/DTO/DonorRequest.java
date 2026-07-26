@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 public class DonorRequest {
 
+//    private String donorName;
     private String bldGroup;
     private String city;
     private String phone;
@@ -18,6 +19,7 @@ public class DonorRequest {
         this.lastDonateDate = lastDonateDate;
         this.available = available;
         this.district = district;
+//        this.donorName = donorName;
     }
 
     public String getBldGroup() {
@@ -67,4 +69,12 @@ public class DonorRequest {
     public void setAvailable(boolean available) {
         this.available = available;
     }
+
+//    public String getDonorName() {
+//        return donorName;
+//    }
+//
+//    public void setDonorName(String donorName) {
+//        this.donorName = donorName;
+//    }
 }

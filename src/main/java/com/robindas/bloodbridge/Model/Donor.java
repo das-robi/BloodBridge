@@ -18,6 +18,8 @@ public class Donor {
     @OneToOne
     @JoinColumn(name = "user_id")
     public Users users;
+
+    private String donorName;
     private String bldGroup;
     private String city;
     private String district;
@@ -29,5 +31,4 @@ public class Donor {
     private LocalDate lastDonateDate;
     private String phone;
     private boolean available;
-
 }

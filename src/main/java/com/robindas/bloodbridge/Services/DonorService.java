@@ -7,6 +7,7 @@ import com.robindas.bloodbridge.Model.Users;
 import com.robindas.bloodbridge.Repositories.DonorRepository;
 import com.robindas.bloodbridge.Repositories.UsersRepository;
 import com.robindas.bloodbridge.Util.Role;
+import com.robindas.bloodbridge.Util.UserAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,15 +23,20 @@ public class DonorService {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private UserAuthentication userAuthentication;
     
     public DonorResponse getDonorProfile() {
 
         //Check USER is Logged-In
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Users users = usersRepository.getUserByUserName(username);
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String username = authentication.getName();
+//        Users users = usersRepository.getUserByUserName(username);
 
-        System.out.println("Users Details: " + users);
+        Users users = userAuthentication.getUserAuthenticated();
+
+//        System.out.println("Users Details: " + users);
 
         Donor donor = donorRepository.findByUsers(users);
 
@@ -41,6 +47,7 @@ public class DonorService {
 
         DonorResponse response = new DonorResponse();
 
+        response.setDonorName(donor.getDonorName());
         response.setBldGroup(donor.getBldGroup());
         response.setCity(donor.getCity());
         response.setDistrict(donor.getDistrict());
@@ -54,10 +61,16 @@ public class DonorService {
     public DonorResponse createDonor(DonorRequest request) {
 
         //Check USER is Logged-In
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String username = authentication.getName();
+////
+//        Users users = usersRepository.getUserByUserName(username);
 
-        Users users = usersRepository.getUserByUserName(username);
+//        userAuthentication.getUserAuthenticated();
+
+        Users users = userAuthentication.getUserAuthenticated();
+
+
         Donor existDonor = donorRepository.findByUsers(users);
 
         if (existDonor != null){
@@ -66,6 +79,7 @@ public class DonorService {
 
         Donor donor = new Donor();
 
+        donor.setDonorName(users.getUserName());
         donor.setBldGroup(request.getBldGroup());
         donor.setPhone(request.getPhone());
         donor.setCity(request.getCity());
@@ -83,7 +97,8 @@ public class DonorService {
         //Convert it into response
         DonorResponse response = new DonorResponse();
 
-        response.setDonId(donor.getDonId());
+//        response.setDonId(donor.getDonId());
+        response.setDonorName(donor.getDonorName());
         response.setPhone(donor.getPhone());
         response.setCity(donor.getCity());
         response.setDistrict(donor.getDistrict());
@@ -94,13 +109,15 @@ public class DonorService {
     }
 
     //DONOR Update profile
-    public Donor updateProfile(DonorRequest request){
+    public DonorResponse updateProfile(DonorRequest request){
 
         //Check USER is Logged-In
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String username = authentication.getName();
+//
+//        Users users = usersRepository.getUserByUserName(username);
 
-        Users users = usersRepository.getUserByUserName(username);
+        Users users = userAuthentication.getUserAuthenticated();
 
         Donor donor = donorRepository.findByUsers(users);
 
@@ -112,26 +129,32 @@ public class DonorService {
 
         System.out.println("USER Update: " + donor);
 
-        //Convert to response
-//        DonorResponse response = new DonorResponse();
-//
-//        response.setDonId(donor.getDonId());
-//        response.setCity(request.getCity());
-//        response.setDistrict(request.getDistrict());
-//        response.setPhone(request.getPhone());
-//        response.setLastDonateDate(request.getLastDonateDate());
-//        response.setAvailable(donor.isAvailable());
+        Donor updateDonor = donorRepository.save(donor);
 
-        return donorRepository.save(donor);
+        //Convert to response
+        DonorResponse response = new DonorResponse();
+
+        response.setDonorName(users.getUserName());
+        response.setCity(updateDonor.getCity());
+        response.setDistrict(updateDonor.getDistrict());
+        response.setPhone(updateDonor.getPhone());
+        response.setLastDonateDate(updateDonor.getLastDonateDate());
+        response.setAvailable(updateDonor.isAvailable());
+
+
+
+        return response;
     }
 
     //DONOR Profile Delete
     public void deleteDonorProfile() {
 
         //Check USER is Logged-In
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Users users = usersRepository.getUserByUserName(username);
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String username = authentication.getName();
+//        Users users = usersRepository.getUserByUserName(username);
+
+        Users users = userAuthentication.getUserAuthenticated();
 
         Donor donor = donorRepository.findByUsers(users);
 
