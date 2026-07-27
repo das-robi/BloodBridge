@@ -1,14 +1,19 @@
 package com.robindas.bloodbridge.Controllers;
 
+import com.robindas.bloodbridge.DTO.BldReqResponse;
+import com.robindas.bloodbridge.DTO.DonorSearchRequest;
 import com.robindas.bloodbridge.DTO.Users.DonorRequest;
 import com.robindas.bloodbridge.DTO.Users.DonorResponse;
 import com.robindas.bloodbridge.Services.DonorService;
 import jakarta.validation.Valid;
+import org.hibernate.query.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/donors")
@@ -45,10 +50,11 @@ public class DonorController {
         return "Success";
     }
 
-//    //Search Blood DONOR
-//    @GetMapping("/search-donor/{keyword}")
-//    public ResponseEntity<List<BloodRequest>> getSearch(String keyword){
-//        return donorService.searchDonor(keyword);
-//    }
+    //Search Blood DONOR
+    @GetMapping("/donor/search")
+    public ResponseEntity<Page<DonorResponse>> getSearch(DonorSearchRequest request, @RequestParam int page, @RequestParam int size,
+                                                         @RequestParam String sortBy, @RequestParam String direction){
+        return new ResponseEntity<>(donorService.searchDonorByDistrict(request, page, sortBy, direction), HttpStatus.OK);
+    }
 
 }

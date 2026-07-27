@@ -18,10 +18,15 @@ import com.robindas.bloodbridge.Repositories.UsersRepository;
 import com.robindas.bloodbridge.Util.Role;
 import com.robindas.bloodbridge.Util.UserAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -49,11 +54,6 @@ public class UserServices {
 
     @Autowired
     private BloodRequestRepo bloodRequestRepo;
-
-    @Autowired
-    private DonorService donorService;
-    @Autowired
-    private BldRequestService requestService;
 
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
@@ -115,12 +115,7 @@ public class UserServices {
     public UserResponse userUpdateProfile(UserRequest request) {
 
         //check Authentication
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String username = authentication.getName();
-//        Users users = repository.getUserByUserName(username);
         Users users = userAuthentication.getUserAuthenticated();
-
-
 
         //Update data
 
@@ -140,11 +135,6 @@ public class UserServices {
             throw new BadRequestException("Can't update");
         }
 
-//        Users existingusers = usersRepository.findById(users.getUserId()).orElseThrow(()-> new ResourceNotFoundException("User not found"));
-//
-//        existingusers.setUserName(request.getUserName());
-//        existingusers.setUserEmail(request.getUserEmail());
-
         usersRepository.save(users);
 
         //Convert into Response
@@ -162,82 +152,154 @@ public class UserServices {
 
 
 
-
-
     //Admin
-    public List<UserResponse> getAllUsers() {
+    public Page<UserResponse> getAllUsers(int page, int size, String sortBy, String direction) {
 
         Users usersAuth = userAuthentication.getUserAuthenticated();
+
 
         if (usersAuth.getRole() != Role.ADMIN){
             throw new ForbiddenException("Only admins can perform this action.");
         }
 
-        List<Users> users = usersRepository.findAll();
-        List<UserResponse> responses = new ArrayList<>();
+        Sort sort;
 
-        for (Users users1 : users){
+        if (direction.equalsIgnoreCase("desc")) {
+            sort = Sort.by(sortBy).descending();
+        }
+        else {
+            sort = Sort.by(sortBy).ascending();
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Users> users = usersRepository.findAll(pageable);
+
+        Page<UserResponse> responses = users.map(users1 -> {
             UserResponse response = new UserResponse();
 
             response.setUserName(users1.getUserName());
             response.setUserEmail(users1.getUserEmail());
 
-            responses.add(response);
-        }
+
+            return response;
+        });
+
+//        for (Users users1 : users){
+//            UserResponse response = new UserResponse();
+//
+//            response.setUserName(users1.getUserName());
+//            response.setUserEmail(users1.getUserEmail());
+//
+//            responses.add(response);
+//        }
 
 
         return responses;
     }
 
-    public List<DonorResponse> getAllDonor() {
-
-        userAuthentication.getUserAuthenticated();
-
-        List<Donor> donors = donorRepository.findAll();
-        List<DonorResponse> responses = new ArrayList<>();
-
-        for (Donor donors1 : donors){
-
-            DonorResponse response = new DonorResponse();
-
-            response.setDonorName(donors1.getDonorName());
-            response.setBldGroup(donors1.getBldGroup());
-            response.setCity(donors1.getCity());
-            response.setDistrict(donors1.getDistrict());
-            response.setPhone(donors1.getPhone());
-            response.setLastDonateDate(donors1.getLastDonateDate());
-            response.setAvailable(donors1.isAvailable());
-
-            responses.add(response);
-        }
-
-        return responses;
-    }
-
-    public List<BldReqResponse> getAllBloodReq() {
+    public Page<DonorResponse> getAllDonor(int page, int size, String sortBy, String direction) {
 
         Users users = userAuthentication.getUserAuthenticated();
 
-        List<BloodRequest> bloodRequests = bloodRequestRepo.findAll();
-        List<BldReqResponse> reqResponses = new ArrayList<>();
+        if (users.getRole() != Role.ADMIN){
+            throw new ForbiddenException("Only admins can perform this action.");
+        }
 
-        for (BloodRequest request : bloodRequests){
+        Sort sort;
 
+        if (direction.equalsIgnoreCase("desc")){
+            sort = Sort.by(sortBy).descending();
+        }
+        else {
+            sort = Sort.by(sortBy).ascending();
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Donor> donors = donorRepository.findAll(pageable);
+
+        //Converting Donors to DonorResponse
+        Page<DonorResponse> responses = donors.map(donor -> {
+
+            DonorResponse response = new DonorResponse();
+
+            response.setDonorName(donor.getDonorName());
+            response.setBldGroup(donor.getBldGroup());
+            response.setCity(donor.getCity());
+            response.setDistrict(donor.getDistrict());
+            response.setPhone(donor.getPhone());
+            response.setLastDonateDate(donor.getLastDonateDate());
+            response.setAvailable(donor.isAvailable());
+
+            return response;
+        });
+
+//        for (Donor donors1 : donors){
+//
+//            DonorResponse response = new DonorResponse();
+//            responses.add(response);
+//
+//
+//        }
+
+        return responses;
+    }
+
+    public Page<BldReqResponse> getAllBloodReq(int page, int size, String sortBy, String direction) {
+
+        Users users = userAuthentication.getUserAuthenticated();
+
+        if (users.getRole() != Role.ADMIN){
+            throw new ForbiddenException("Only admins can perform this action.");
+        }
+
+        Sort sort;
+
+        if (direction.equalsIgnoreCase("desc")){
+            sort = Sort.by(sortBy).descending();
+        }
+        else {
+            sort = Sort.by(sortBy).ascending();
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<BloodRequest> bloodRequests = bloodRequestRepo.findAll(pageable);
+
+        Page<BldReqResponse> reqResponses = bloodRequests.map(bloodRequest-> {
             BldReqResponse response = new BldReqResponse();
 
-            response.setPatientName(request.getPatientName());
-            response.setBldGroup(request.getBldGroup());
-            response.setStatus(request.getStatus());
-            response.setDisease(request.getDisease());
-            response.setCity(request.getCity());
-            response.setDistrict(request.getDistrict());
-            response.setHospital(request.getHospital());
-            response.setUnit(request.getUnit());
-            response.setRequesterName(request.getRequesterName());
+            response.setPatientName(bloodRequest.getPatientName());
+            response.setBldGroup(bloodRequest.getBldGroup());
+            response.setDisease(bloodRequest.getDisease());
+            response.setCity(bloodRequest.getCity());
+            response.setDistrict(bloodRequest.getDistrict());
+            response.setHospital(bloodRequest.getHospital());
+            response.setUnit(bloodRequest.getUnit());
+            response.setStatus(bloodRequest.getStatus());
+            response.setRequesterName(bloodRequest.getRequesterName());
 
-            reqResponses.add(response);
+            return response;
+        });
 
-        }
+//        for (BloodRequest request : bloodRequests){
+//
+//            BldReqResponse response = new BldReqResponse();
+//
+//            response.setPatientName(request.getPatientName());
+//            response.setBldGroup(request.getBldGroup());
+//            response.setStatus(request.getStatus());
+//            response.setDisease(request.getDisease());
+//            response.setCity(request.getCity());
+//            response.setDistrict(request.getDistrict());
+//            response.setHospital(request.getHospital());
+//            response.setUnit(request.getUnit());
+//            response.setRequesterName(request.getRequesterName());
+//
+//            reqResponses.add(response);
+//
+//        }
 
         return reqResponses;
     }

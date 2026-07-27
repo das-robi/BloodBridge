@@ -1,5 +1,6 @@
 package com.robindas.bloodbridge.Services;
 
+import com.robindas.bloodbridge.DTO.DonorSearchRequest;
 import com.robindas.bloodbridge.DTO.Users.DonorRequest;
 import com.robindas.bloodbridge.DTO.Users.DonorResponse;
 import com.robindas.bloodbridge.Exceptions.BadRequestException;
@@ -8,10 +9,19 @@ import com.robindas.bloodbridge.Model.Donor;
 import com.robindas.bloodbridge.Model.Users;
 import com.robindas.bloodbridge.Repositories.DonorRepository;
 import com.robindas.bloodbridge.Repositories.UsersRepository;
+import com.robindas.bloodbridge.Specification.DonorSpecification;
 import com.robindas.bloodbridge.Util.Role;
 import com.robindas.bloodbridge.Util.UserAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class DonorService {
@@ -26,14 +36,12 @@ public class DonorService {
 
     @Autowired
     private UserAuthentication userAuthentication;
-    
+
+
+
     public DonorResponse getDonorProfile() {
 
         //Check USER is Logged-In
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String username = authentication.getName();
-//        Users users = usersRepository.getUserByUserName(username);
-
         Users users = userAuthentication.getUserAuthenticated();
 
 //        System.out.println("Users Details: " + users);
@@ -61,15 +69,7 @@ public class DonorService {
     public DonorResponse createDonor(DonorRequest request) {
 
         //Check USER is Logged-In
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String username = authentication.getName();
-////
-//        Users users = usersRepository.getUserByUserName(username);
-
-//        userAuthentication.getUserAuthenticated();
-
         Users users = userAuthentication.getUserAuthenticated();
-
 
         Donor existDonor = donorRepository.findByUsers(users);
 
@@ -112,11 +112,6 @@ public class DonorService {
     public DonorResponse updateProfile(DonorRequest request){
 
         //Check USER is Logged-In
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String username = authentication.getName();
-//
-//        Users users = usersRepository.getUserByUserName(username);
-
         Users users = userAuthentication.getUserAuthenticated();
 
         Donor donor = donorRepository.findByUsers(users);
@@ -165,10 +160,6 @@ public class DonorService {
     public void deleteDonorProfile() {
 
         //Check USER is Logged-In
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String username = authentication.getName();
-//        Users users = usersRepository.getUserByUserName(username);
-
         Users users = userAuthentication.getUserAuthenticated();
 
         Donor donor = donorRepository.findByUsers(users);
@@ -178,4 +169,72 @@ public class DonorService {
         donorRepository.delete(donor);
     }
 
+    public Page<DonorResponse> searchDonorByDistrict(DonorSearchRequest request, int page, int size, String sortBy, String direction) {
+
+        userAuthentication.getUserAuthenticated();
+
+        Specification<Donor> specification = Specification.where((Specification<Donor>) null);
+
+        //Search and Filtering by Blood Group
+        if (request.getBldGrp() != null && !request.getBldGrp().isBlank()){
+            specification = specification.and(DonorSpecification.hasBloodGroup(request.getBldGrp()));
+        }
+
+        //Search and Filtering by District
+        if (request.getDistrict() != null && !request.getDistrict().isBlank()){
+            specification = specification.and(DonorSpecification.hasDistrict(request.getDistrict()));
+        }
+
+        //Search and Filtering by City
+        if (request.getCity() != null && !request.getCity().isBlank()){
+            specification = specification.and(DonorSpecification.hasCity(request.getCity()));
+        }
+
+        //Search and Filtering by available
+        if (!request.isAvailable()){
+            specification = specification.and(DonorSpecification.hasAvailable(request.isAvailable()));
+        }
+
+        //Sorting and Pagination
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+         Page<Donor> donors = donorRepository.findAll(pageable);
+
+         Page<DonorResponse> responses = donors.map(donor ->{
+
+             DonorResponse response = new DonorResponse();
+
+             response.setDonorName(donor.getDonorName());
+             response.setBldGroup(donor.getBldGroup());
+             response.setPhone(donor.getPhone());
+             response.setDistrict(donor.getDistrict());
+             response.setCity(donor.getCity());
+             response.setAvailable(donor.isAvailable());
+             response.setLastDonateDate(donor.getLastDonateDate());
+
+             return response;
+         });
+
+
+//         for (Donor donor : donors){
+//
+//             DonorResponse response = new DonorResponse();
+//
+//             response.setDonorName(donor.getDonorName());
+//             response.setBldGroup(donor.getBldGroup());
+//             response.setAvailable(response.isAvailable());
+//             response.setPhone(donor.getPhone());
+//             response.setCity(donor.getCity());
+//             response.setDistrict(donor.getDistrict());
+//             response.setLastDonateDate(donor.getLastDonateDate());
+//
+//             responses.add(response);
+//         }
+
+         return responses;
+    }
 }
