@@ -5,6 +5,7 @@ import com.robindas.bloodbridge.DTO.BldReqResponse;
 import com.robindas.bloodbridge.Model.BloodRequest;
 import com.robindas.bloodbridge.Services.BldRequestService;
 import com.robindas.bloodbridge.Util.ResponseStatus;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +22,14 @@ public class BldRequestController {
 
     //Request for Blood
     @PostMapping("/create")
-    public ResponseEntity<BldReqResponse> requestForBlood(@RequestBody BldReqDTO bldReqDTO){
+    public ResponseEntity<BldReqResponse> requestForBlood(@Valid @RequestBody BldReqDTO bldReqDTO){
 
         return new ResponseEntity<>(bldRequestService.requestForBlood(bldReqDTO), HttpStatus.CREATED);
     }
 
     //Update blood Request status
     @PutMapping("/{id}/status")
-    public ResponseEntity<BloodRequest> updateRequestStatus(@PathVariable int id, @RequestBody ResponseStatus status){
+    public ResponseEntity<BloodRequest> updateRequestStatus(@Valid @PathVariable int id, @RequestBody ResponseStatus status){
         return new ResponseEntity<>(bldRequestService.updateRequestStatus(id, status), HttpStatus.OK);
     }
 

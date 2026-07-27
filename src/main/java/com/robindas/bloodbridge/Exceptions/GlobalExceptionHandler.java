@@ -53,4 +53,33 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(responses, HttpStatus.FORBIDDEN);
     }
 
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponses> handleConflictException(ConflictException exception, HttpServletRequest request){
+
+        ErrorResponses responses = new ErrorResponses(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(responses, HttpStatus.CONFLICT);
+    }
+
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponses> handleGenericException(Exception exception, HttpServletRequest request){
+
+        ErrorResponses responses = new ErrorResponses(
+                LocalDateTime.now(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal Server Error",
+                "Something went wrong. Please try again later.",
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(responses, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 }

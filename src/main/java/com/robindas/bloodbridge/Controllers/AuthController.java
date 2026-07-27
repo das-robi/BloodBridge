@@ -3,6 +3,7 @@ package com.robindas.bloodbridge.Controllers;
 import com.robindas.bloodbridge.DTO.LoginRequest;
 import com.robindas.bloodbridge.DTO.RegisterRequest;
 import com.robindas.bloodbridge.Services.UserServices;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +19,7 @@ public class AuthController {
     private UserServices userServices;
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody RegisterRequest response){
+    public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterRequest response){
 
         userServices.UserRegister(response);
 
@@ -26,7 +27,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String loginUser(@RequestBody LoginRequest request){
+    public String loginUser(@Valid @RequestBody LoginRequest request){
         System.out.println("Login API HIT");
 
         System.out.println("Usrename: " +  request.getUserName());

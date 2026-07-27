@@ -3,6 +3,7 @@ package com.robindas.bloodbridge.Controllers;
 import com.robindas.bloodbridge.DTO.Users.DonorRequest;
 import com.robindas.bloodbridge.DTO.Users.DonorResponse;
 import com.robindas.bloodbridge.Services.DonorService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +25,13 @@ public class DonorController {
 
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/me")
-    public ResponseEntity<DonorResponse> createDonor(@RequestBody DonorRequest request){
+    public ResponseEntity<DonorResponse> createDonor(@Valid @RequestBody DonorRequest request){
         return new ResponseEntity<>(donorService.createDonor(request), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('DONOR','USER')")
     @PutMapping("/me")
-    public ResponseEntity<DonorResponse> updateProfile(@RequestBody DonorRequest request){
+    public ResponseEntity<DonorResponse> updateProfile(@Valid @RequestBody DonorRequest request){
 
         return new ResponseEntity<>(donorService.updateProfile(request), HttpStatus.OK);
     }

@@ -1,16 +1,34 @@
 package com.robindas.bloodbridge.DTO.Users;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
+
 import java.time.LocalDate;
 
 public class DonorRequest {
 
 //    private String donorName;
+    @NotBlank
     private String bldGroup;
+
+    @NotBlank
     private String city;
+
+    @NotBlank
+    @Pattern(regexp = "^01[3-9]\\d{8}$")
     private String phone;
+
+    @NotBlank
     private String district;
+
+    @NotNull(message = "Last donation date is required")
+    @Past(message = "Last donation date must be in the past")
     private LocalDate lastDonateDate;
-    private boolean available;
+
+    @NotNull(message = "Availability is required")
+    private Boolean available;
 
     public DonorRequest(String bldGroup, String city, String phone, LocalDate lastDonateDate, String district, boolean available) {
         this.bldGroup = bldGroup;

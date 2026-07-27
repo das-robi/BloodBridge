@@ -1,18 +1,17 @@
 package com.robindas.bloodbridge.Services;
 
 import com.robindas.bloodbridge.Exceptions.BadRequestException;
+import com.robindas.bloodbridge.Exceptions.ConflictException;
 import com.robindas.bloodbridge.Exceptions.ForbiddenException;
 import com.robindas.bloodbridge.Exceptions.ResourceNotFoundException;
-import com.robindas.bloodbridge.Model.BloodRequest;
-import com.robindas.bloodbridge.Model.DonationResponse;
-import com.robindas.bloodbridge.Model.Donor;
-import com.robindas.bloodbridge.Model.Users;
+import com.robindas.bloodbridge.Model.*;
 import com.robindas.bloodbridge.Repositories.BloodRequestRepo;
 import com.robindas.bloodbridge.Repositories.DonResRepository;
 import com.robindas.bloodbridge.Repositories.DonorRepository;
 import com.robindas.bloodbridge.Repositories.UsersRepository;
 import com.robindas.bloodbridge.Util.ResponseStatus;
 import com.robindas.bloodbridge.Util.Role;
+import com.robindas.bloodbridge.Util.UserAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,17 +42,14 @@ public class DonResService {
     private BldRequestService bldRequestService;
 
     @Autowired
-    DonorService donorService;
+    private UserAuthentication userAuthentication;
 
 
     //Blood Request Accepted
     public String requestAccepted(int requestId) {
 
         //Checking here user are authenticated or not
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        Users users = usersRepository.getUserByUserName(username);
+        Users users = userAuthentication.getUserAuthenticated();
 
         //check DONOR profile
         Donor donor = donorRepository.findByUsers(users);
@@ -67,15 +63,13 @@ public class DonResService {
 
         //Check if already accept
         if (donResRepository.existsByBloodRequestAndDonor(bloodRequest, donor)){
-            return "You already accepted the request.";
+            throw new BadRequestException("You have already accepted request");
         }
 
         //Check if already accept request
         if (bloodRequest.getStatus() == ResponseStatus.Accepted){
-//            throw new RuntimeException("Blood Request is already accepted by: " + donor.getUsers().getUserName());
-            return "Blood Request is already accepted";
+            throw new ConflictException("Blood Request is already accepted");
         }
-
 
 
         //save DonationResponse
@@ -96,31 +90,35 @@ public class DonResService {
             );
 
 
+            Users requesters = bloodRequest.getCreatedBy();
 
-            notificationService.createNotificationForAccept(
-                    "Blood Request Status Accepted",
+              notificationService.createNotificationForAccept(
+                    "Blood Request Accepted",
                     donor.getUsers().getUserName() + "has accept your blood donation request",
                     bloodRequest.getBldGroup(),
-                    donor.getUsers().getUserName()
+                    donor.getUsers().getUserName(),
+                    requesters,
+                    LocalDateTime.now()
             );
+
+
 
         return "Blood Request Accepted";
     }
 
     public String requestRejected(int requestId) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        Users users = usersRepository.getUserByUserName(username);
+        Users users = userAuthentication.getUserAuthenticated();
 
         Donor donor = donorRepository.findByUsers(users);
 
         BloodRequest bloodRequest = bloodRequestRepo.findById(requestId).orElseThrow(()-> new ResourceNotFoundException("Blood Request not found"));
 
         if (donResRepository.existsByBloodRequestAndDonor(bloodRequest, donor)){
-            throw new BadRequestException("You already rejected the request");
+            throw new BadRequestException("You have already rejected the request");
         }
+
+
 
         DonationResponse response = new DonationResponse();
 

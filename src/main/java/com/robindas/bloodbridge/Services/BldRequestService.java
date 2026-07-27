@@ -14,6 +14,7 @@ import com.robindas.bloodbridge.Util.UserAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,12 +98,14 @@ public class BldRequestService {
                     "Urgent Need Blood",
                     "A patient need " + saveRequest.getBldGroup() + "blood at " + saveRequest.getHospital(),
                     donor1.getUsers(),
-                    saveRequest);
+                    LocalDateTime.now(),
+                    saveRequest
+            );
 
 
 
             //Check Notification are sending
-            System.out.println("Notification Sent to users: " + donor1.getUsers().getUserName());
+            System.out.println("Notification Sent to Donors: " + donor1.getUsers().getUserName());
         }
 
         return response;

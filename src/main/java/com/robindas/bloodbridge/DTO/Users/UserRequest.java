@@ -1,8 +1,16 @@
 package com.robindas.bloodbridge.DTO.Users;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public class UserRequest {
 
+    @NotNull
     private String userName;
+
+    @NotBlank
+    @Email
     private String userEmail;
 
     public UserRequest(String userName, String userEmail) {
