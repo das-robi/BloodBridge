@@ -7,7 +7,7 @@ public class DonorSpecification {
 
     public static Specification<Donor> hasBloodGroup(String bldGrp){
         return (root, query, criteriaBuilder) ->
-            criteriaBuilder.equal(root.get("bldGpoup"), bldGrp);
+            criteriaBuilder.equal(root.get("bldGroup"), bldGrp);
 
     }
 
@@ -25,7 +25,7 @@ public class DonorSpecification {
 
     }
 
-    public static Specification<Donor> hasAvailable(boolean available){
+    public static Specification<Donor> hasAvailable(Boolean available){
 
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("available"), available);

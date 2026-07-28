@@ -26,7 +26,7 @@ public class AdminController {
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<UserResponse>> getAllUsers(@RequestParam int page, @RequestParam int size,
-                                                          @RequestParam(defaultValue = "username") String sortBy,
+                                                          @RequestParam(defaultValue = "userName") String sortBy,
                                                           @RequestParam(defaultValue = "asc") String ascending){
         return ResponseEntity.ok(userServices.getAllUsers(page, size, sortBy, ascending));
     }
@@ -48,7 +48,7 @@ public class AdminController {
     @GetMapping("/blood-request")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<BldReqResponse>> getAllBloodReq(@RequestParam int page, @RequestParam int size,
-                                                               @RequestParam(defaultValue = "BloodGroup") String sortBy,
+                                                               @RequestParam(defaultValue = "bldGroup") String sortBy,
                                                                @RequestParam(defaultValue = "asc") String ascending){
         return ResponseEntity.ok(userServices.getAllBloodReq(page, size, sortBy, ascending));
     }

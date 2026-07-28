@@ -173,7 +173,7 @@ public class DonorService {
 
         userAuthentication.getUserAuthenticated();
 
-        Specification<Donor> specification = Specification.where((Specification<Donor>) null);
+        Specification<Donor> specification = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
 
         //Search and Filtering by Blood Group
         if (request.getBldGrp() != null && !request.getBldGrp().isBlank()){
@@ -191,8 +191,8 @@ public class DonorService {
         }
 
         //Search and Filtering by available
-        if (!request.isAvailable()){
-            specification = specification.and(DonorSpecification.hasAvailable(request.isAvailable()));
+        if (request.getAvailable() != null){
+            specification = specification.and(DonorSpecification.hasAvailable(request.getAvailable()));
         }
 
         //Sorting and Pagination
@@ -202,7 +202,7 @@ public class DonorService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-         Page<Donor> donors = donorRepository.findAll(pageable);
+         Page<Donor> donors = donorRepository.findAll(specification, pageable);
 
          Page<DonorResponse> responses = donors.map(donor ->{
 

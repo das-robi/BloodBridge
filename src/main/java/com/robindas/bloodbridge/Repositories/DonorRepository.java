@@ -14,6 +14,7 @@ public interface DonorRepository extends JpaRepository<Donor, Integer> , JpaSpec
 
 
     //Search Blood Donor
-//    List<Donor> findByBldGroupAndDistrict(String bldGroup, String district);
+    List<Donor> findByBldGroupAndDistrict(String bldGroup, String district);
+
 //    List<Donor> findByBldGroupAndDistrictAndAvailable(String bldGrp, String district, String available);
 }
