@@ -12,6 +12,8 @@ public class BldReqResponse {
     private String bldGroup;
     private String city;
     private String district;
+    private Double latitude;
+    private Double longitude;
     private String hospital;
     private String unit;
     private String disease;

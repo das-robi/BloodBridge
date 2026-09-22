@@ -13,6 +13,9 @@ import com.robindas.bloodbridge.Util.ResponseStatus;
 import com.robindas.bloodbridge.Util.UserAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,6 +23,8 @@ import java.util.List;
 
 @Service
 public class BldRequestService {
+
+    private static final Logger log = LoggerFactory.getLogger(BldRequestService.class);
 
     @Autowired
     private BloodRequestRepo bloodRequestRepo;
@@ -29,6 +34,12 @@ public class BldRequestService {
 
     @Autowired
     private DonorRepository donorRepository;
+
+    @Autowired
+    private DonorService donorService;
+
+    @Value("${app.matching.radius-km:10}")
+    private double matchingRadiusKm;
 
     @Autowired
     private NotificationService notificationService;
@@ -53,6 +64,8 @@ public class BldRequestService {
         saveRequest.setBldGroup(bldReqDTO.getBldGroup());
         saveRequest.setCity(bldReqDTO.getCity());
         saveRequest.setDistrict(bldReqDTO.getDistrict());
+        saveRequest.setLatitude(bldReqDTO.getLatitude());
+        saveRequest.setLongitude(bldReqDTO.getLongitude());
         saveRequest.setDisease(bldReqDTO.getDisease());
         saveRequest.setHospital(bldReqDTO.getHospital());
         saveRequest.setUnit(bldReqDTO.getUnit());
@@ -65,33 +78,28 @@ public class BldRequestService {
         saveRequest = bloodRequestRepo.save(saveRequest);
 
         //Finding matching DONOR
-        List<Donor> donor = donorRepository.findByBldGroupAndDistrict(
-                saveRequest.getBldGroup(), saveRequest.getDistrict());
+        // Geographic matching replaces district-only matching while city/district stay as display data.
+        List<Donor> donor = donorService.findMatchingDonors(saveRequest.getLatitude(), saveRequest.getLongitude(),
+                saveRequest.getBldGroup(), matchingRadiusKm);
 
 
         BldReqResponse response = new BldReqResponse();
 
         response.setPatientName(saveRequest.getPatientName());
         response.setBldGroup(saveRequest.getBldGroup());
-        response.setBldGroup(saveRequest.getDisease());
+        response.setDisease(saveRequest.getDisease());
         response.setHospital(saveRequest.getHospital());
         response.setUnit(saveRequest.getUnit());
         response.setDistrict(saveRequest.getDistrict());
         response.setCity(saveRequest.getCity());
+        response.setLatitude(saveRequest.getLatitude());
+        response.setLongitude(saveRequest.getLongitude());
         response.setStatus(ResponseStatus.Pending);
         response.setRequesterName(saveRequest.getRequesterName());
 
-        System.out.println("Finding All DONOR: " + donor.size());
+        log.info("Blood request {} created; {} available matching donors found within {} km", saveRequest.getBldId(), donor.size(), matchingRadiusKm);
 
         for (Donor donor1 : donor){
-
-            //Debug
-            System.out.println("DONOR BloodGroup: " + donor1.getBldGroup());
-            System.out.println("DONOR City: " + donor1.getCity());
-            System.out.println("DONOR District " + donor1.getDistrict());
-            System.out.println("DONOR Phone " + donor1.getPhone());
-            System.out.println("DONOR last date of blood donate" + donor1.getLastDonateDate());
-
 
             //Create Notification and Send matching users
             notificationService.createNotification(
@@ -101,11 +109,6 @@ public class BldRequestService {
                     LocalDateTime.now(),
                     saveRequest
             );
-
-
-
-            //Check Notification are sending
-            System.out.println("Notification Sent to Donors: " + donor1.getUsers().getUserName());
         }
 
         return response;

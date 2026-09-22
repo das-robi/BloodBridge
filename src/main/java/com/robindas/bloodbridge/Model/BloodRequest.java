@@ -16,6 +16,12 @@ public class BloodRequest {
     private String bldGroup;
     private String city;
     private String district;
+
+    @Column(columnDefinition = "double precision")
+    private Double latitude;
+
+    @Column(columnDefinition = "double precision")
+    private Double longitude;
     private String hospital;
     private String unit;
     private String disease;

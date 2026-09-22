@@ -11,19 +11,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class NotificationService {
+    private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
 
     @Autowired
     private NotificationRepo notificationRepo;
 
     @Autowired
     private UserAuthentication userAuthentication;
+    @Autowired
+    private PushNotificationService pushNotificationService;
 
     public void createNotification(String notTitle, String notMessage, Users users, LocalDateTime localDateTime, BloodRequest bloodRequest){
 
@@ -37,6 +43,10 @@ public class NotificationService {
         notification.setRead(false);
 
         notificationRepo.save(notification);
+        // Persist first so users can still see the notification if FCM is unavailable.
+        pushNotificationService.sendAsync(users, notTitle, notMessage, Map.of(
+                "event", "NEW_MATCH", "bloodRequestId", String.valueOf(bloodRequest.getBldId())));
+        log.info("Created NEW_MATCH notification: requestId={}, recipientId={}", bloodRequest.getBldId(), users.getUserId());
     }
 
 
@@ -63,8 +73,8 @@ public class NotificationService {
         notification.setLocalDateTime(localDateTime);
 
         notificationRepo.save(notification);
-
-        System.out.println("Notification sends to Requester " + notification.getUsers().getUserName() + notification.getUsers().getUserId());
+        pushNotificationService.sendAsync(requester, title, message, Map.of("event", "REQUEST_ACCEPTED"));
+        log.info("Created REQUEST_ACCEPTED notification: recipientId={}", requester.getUserId());
     }
 
     public List<NotificResponse> getAllNotification() {

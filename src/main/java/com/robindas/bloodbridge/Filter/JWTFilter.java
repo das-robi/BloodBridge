@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import io.jsonwebtoken.JwtException;
 
 import java.io.IOException;
 
@@ -36,7 +37,11 @@ public class JWTFilter extends OncePerRequestFilter {
 
         if (authHead != null && authHead.startsWith("Bearer ")){
             token = authHead.substring(7);
-            username = jwtTokenServices.extractUsername(token);
+            try {
+                username = jwtTokenServices.extractUsername(token);
+            } catch (JwtException | IllegalArgumentException ignored) {
+                // Invalid or expired access tokens must not prevent /auth/refresh from executing.
+            }
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null){

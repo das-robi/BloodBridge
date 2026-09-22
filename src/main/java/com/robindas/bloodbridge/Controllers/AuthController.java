@@ -2,6 +2,8 @@ package com.robindas.bloodbridge.Controllers;
 
 import com.robindas.bloodbridge.DTO.LoginRequest;
 import com.robindas.bloodbridge.DTO.RegisterRequest;
+import com.robindas.bloodbridge.DTO.AuthResponse;
+import com.robindas.bloodbridge.DTO.RefreshTokenRequest;
 import com.robindas.bloodbridge.Services.UserServices;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,14 +29,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String loginUser(@Valid @RequestBody LoginRequest request){
-        System.out.println("Login API HIT");
-
-        System.out.println("Usrename: " +  request.getUserName());
-        System.out.println("Useremail: " + request.getUserEmail());
-        System.out.println("Password: " + request.getPassWord());
-
+    public AuthResponse loginUser(@Valid @RequestBody LoginRequest request){
        return userServices.verifyUser(request);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return ResponseEntity.ok(userServices.refreshAccessToken(request.getRefreshToken()));
     }
 
 }

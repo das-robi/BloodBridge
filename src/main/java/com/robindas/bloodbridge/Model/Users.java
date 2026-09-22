@@ -15,6 +15,10 @@ public class Users {
     private String passWord;
     private String userEmail;
 
+    /** Latest Firebase registration token reported by the Android app for this user. */
+    @Column(length = 4096)
+    private String fcmToken;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 

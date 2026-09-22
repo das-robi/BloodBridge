@@ -19,12 +19,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class DonorService {
+    private static final Logger log = LoggerFactory.getLogger(DonorService.class);
 
     @Autowired
     private DonorRepository donorRepository;
@@ -84,6 +87,8 @@ public class DonorService {
         donor.setPhone(request.getPhone());
         donor.setCity(request.getCity());
         donor.setDistrict(request.getDistrict());
+        donor.setLatitude(request.getLatitude());
+        donor.setLongitude(request.getLongitude());
         donor.setLastDonateDate(request.getLastDonateDate());
         donor.setAvailable(request.isAvailable());
         donor.setUsers(users);
@@ -104,6 +109,8 @@ public class DonorService {
         response.setDistrict(donor.getDistrict());
         response.setLastDonateDate(donor.getLastDonateDate());
         response.setAvailable(donor.isAvailable());
+        response.setLatitude(donor.getLatitude());
+        response.setLongitude(donor.getLongitude());
 
         return response;
     }
@@ -136,6 +143,10 @@ public class DonorService {
         if (request.getLastDonateDate() != null) {
             donor.setLastDonateDate(request.getLastDonateDate());
         }
+        if (request.getLatitude() != null && request.getLongitude() != null) {
+            donor.setLatitude(request.getLatitude());
+            donor.setLongitude(request.getLongitude());
+        }
 
         System.out.println("USER Update: " + donor);
 
@@ -150,6 +161,8 @@ public class DonorService {
         response.setPhone(updateDonor.getPhone());
         response.setLastDonateDate(updateDonor.getLastDonateDate());
         response.setAvailable(updateDonor.isAvailable());
+        response.setLatitude(updateDonor.getLatitude());
+        response.setLongitude(updateDonor.getLongitude());
 
 
 
@@ -215,6 +228,8 @@ public class DonorService {
              response.setCity(donor.getCity());
              response.setAvailable(donor.isAvailable());
              response.setLastDonateDate(donor.getLastDonateDate());
+             response.setLatitude(donor.getLatitude());
+             response.setLongitude(donor.getLongitude());
 
              return response;
          });
@@ -236,5 +251,47 @@ public class DonorService {
 //         }
 
          return responses;
+    }
+
+    /** Composes normal donor predicates with a PostGIS spatial predicate. */
+    public Page<DonorResponse> findNearbyDonors(double latitude, double longitude, double radiusKm,
+                                                  String bloodGroup, int page, int size) {
+
+        userAuthentication.getUserAuthenticated();
+
+        Specification<Donor> specification = Specification.where(DonorSpecification.hasAvailable(true))
+                .and(DonorSpecification.hasCoordinates())
+                .and(DonorSpecification.withinRadius(latitude, longitude, radiusKm * 1_000));
+
+        if (bloodGroup != null && !bloodGroup.isBlank()) {
+            specification = specification.and(DonorSpecification.hasBloodGroup(bloodGroup));
+        }
+
+        log.info("Nearby donor search: latitude={}, longitude={}, radiusKm={}, bloodGroup={}",
+                latitude, longitude, radiusKm, bloodGroup);
+        return donorRepository.findAll(specification, PageRequest.of(page, size)).map(this::toResponse);
+
+    }
+
+    public List<Donor> findMatchingDonors(double latitude, double longitude, String bloodGroup, double radiusKm) {
+        Specification<Donor> specification = Specification.where(DonorSpecification.hasAvailable(true))
+                .and(DonorSpecification.hasCoordinates())
+                .and(DonorSpecification.hasBloodGroup(bloodGroup))
+                .and(DonorSpecification.withinRadius(latitude, longitude, radiusKm * 1_000));
+        return donorRepository.findAll(specification);
+    }
+
+    private DonorResponse toResponse(Donor donor) {
+        DonorResponse response = new DonorResponse();
+        response.setDonorName(donor.getDonorName());
+        response.setBldGroup(donor.getBldGroup());
+        response.setPhone(donor.getPhone());
+        response.setDistrict(donor.getDistrict());
+        response.setCity(donor.getCity());
+        response.setAvailable(donor.isAvailable());
+        response.setLastDonateDate(donor.getLastDonateDate());
+        response.setLatitude(donor.getLatitude());
+        response.setLongitude(donor.getLongitude());
+        return response;
     }
 }

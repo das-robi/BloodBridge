@@ -3,6 +3,7 @@ package com.robindas.bloodbridge.Services;
 import com.robindas.bloodbridge.DTO.*;
 import com.robindas.bloodbridge.DTO.LoginRequest;
 import com.robindas.bloodbridge.DTO.RegisterRequest;
+import com.robindas.bloodbridge.DTO.FcmTokenRequest;
 import com.robindas.bloodbridge.DTO.Users.DonorResponse;
 import com.robindas.bloodbridge.DTO.Users.UserRequest;
 import com.robindas.bloodbridge.DTO.Users.UserResponse;
@@ -38,10 +39,15 @@ public class UserServices {
 
     @Autowired
     private UsersRepository repository;
+
     @Autowired
     AuthenticationManager authManager;
+
     @Autowired
     private JwtTokenServices jwtTokenServices;
+
+    @Autowired
+    private RefreshTokenService refreshTokenService;
 
     @Autowired
     private UserAuthentication userAuthentication;
@@ -77,17 +83,39 @@ public class UserServices {
     }
 
 
-    public String verifyUser(LoginRequest request) {
+    public AuthResponse verifyUser(LoginRequest request) {
 
         Authentication authentication = authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUserName(), request.getPassWord()));
 
         if (authentication.isAuthenticated()){
-            return jwtTokenServices.generateKey(request.getUserName());
+            Users user = repository.getUserByUserName(request.getUserName());
+            return tokenResponse(user);
         }
         else {
             throw new BadRequestException("Invalid your password and name");
         }
+    }
+
+    public AuthResponse refreshAccessToken(String refreshToken) {
+
+        Users user = refreshTokenService.consumeAndRotate(refreshToken);
+        return tokenResponse(user);
+    }
+
+    /** Android should call this after Firebase issues or rotates its device token. */
+    public void updateFcmToken(FcmTokenRequest request) {
+        Users user = userAuthentication.getUserAuthenticated();
+        user.setFcmToken(request.fcmToken());
+        repository.save(user);
+    }
+
+    private AuthResponse tokenResponse(Users user) {
+        return new AuthResponse(
+                jwtTokenServices.generateKey(user.getUserName()),
+                refreshTokenService.create(user),
+                "Bearer",
+                jwtTokenServices.getAccessTokenTtlSeconds());
     }
 
 

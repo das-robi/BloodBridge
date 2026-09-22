@@ -5,9 +5,8 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,25 +14,18 @@ import java.util.function.Function;
 
 import io.jsonwebtoken.Jwts;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 @Service
 public class JwtTokenServices {
 
-    private String secreteKey = " ";
+    private final String secretKey;
+    private final long accessTokenTtlMillis;
 
-
-    public JwtTokenServices() {
-
-        try {
-            KeyGenerator genKey = KeyGenerator.getInstance("HmacSHA256");
-            SecretKey sk = genKey.generateKey();
-            secreteKey = Base64.getEncoder().encodeToString(sk.getEncoded());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-
+    public JwtTokenServices(@Value("${security.jwt.secret}") String secretKey,
+                            @Value("${security.jwt.access-token-ttl:PT5M}") java.time.Duration accessTokenTtl) {
+        this.secretKey = secretKey;
+        this.accessTokenTtlMillis = accessTokenTtl.toMillis();
     }
 
     public String generateKey(String username) {
@@ -45,7 +37,7 @@ public class JwtTokenServices {
                 .add(claims)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 5))
+                .expiration(new Date(System.currentTimeMillis() + accessTokenTtlMillis))
                 .and()
                 .signWith(getKeys())
                 .compact();
@@ -53,7 +45,7 @@ public class JwtTokenServices {
 
     private SecretKey getKeys() {
 
-        byte[] keyByte = Decoders.BASE64.decode(secreteKey);
+        byte[] keyByte = Decoders.BASE64.decode(secretKey);
 
         return Keys.hmacShaKeyFor(keyByte);
     }
@@ -80,8 +72,14 @@ public class JwtTokenServices {
 
         final String username = extractUsername(token);
 
-        System.out.println("Checking Validate user: " + userDetails.getUsername());
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+    }
 
-        return username.equals(userDetails.getUsername());
+    public long getAccessTokenTtlSeconds() {
+        return accessTokenTtlMillis / 1000;
+    }
+
+    private boolean isTokenExpired(String token) {
+        return extractAllClaims(token).getExpiration().before(new Date());
     }
 }

@@ -2,6 +2,7 @@ package com.robindas.bloodbridge.Controllers;
 
 import com.robindas.bloodbridge.DTO.Users.UserRequest;
 import com.robindas.bloodbridge.DTO.Users.UserResponse;
+import com.robindas.bloodbridge.DTO.FcmTokenRequest;
 import com.robindas.bloodbridge.Services.UserServices;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,13 @@ public class UserController {
     @PutMapping("/me")
     public UserResponse updateProfile(@Valid @RequestBody UserRequest request){
         return userServices.userUpdateProfile(request);
+    }
+
+    @PreAuthorize("hasAnyRole('USER','DONOR')")
+    @PutMapping("/me/fcm-token")
+    public ResponseEntity<Void> updateFcmToken(@Valid @RequestBody FcmTokenRequest request) {
+        userServices.updateFcmToken(request);
+        return ResponseEntity.noContent().build();
     }
 
 }

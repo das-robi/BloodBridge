@@ -15,6 +15,9 @@ public class LoginRequest {
     @Size(min = 8, max = 20, message = "Password must between be 8 and 20 characters")
     private String passWord;
 
+    public LoginRequest() {
+    }
+
 
     public LoginRequest(String userName, String userEmail, String passWord) {
         this.userName = userName;

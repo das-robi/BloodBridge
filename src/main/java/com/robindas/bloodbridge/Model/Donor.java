@@ -24,6 +24,13 @@ public class Donor {
     private String city;
     private String district;
 
+    // WGS84 coordinates supplied by Android. PostGIS uses longitude first, latitude second.
+    @Column(columnDefinition = "double precision")
+    private Double latitude;
+
+    @Column(columnDefinition = "double precision")
+    private Double longitude;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 

@@ -2,6 +2,7 @@ package com.robindas.bloodbridge.Controllers;
 
 import com.robindas.bloodbridge.DTO.BldReqResponse;
 import com.robindas.bloodbridge.DTO.DonorSearchRequest;
+import com.robindas.bloodbridge.DTO.NearbyDonorRequest;
 import com.robindas.bloodbridge.DTO.Users.DonorRequest;
 import com.robindas.bloodbridge.DTO.Users.DonorResponse;
 import com.robindas.bloodbridge.Services.DonorService;
@@ -55,6 +56,15 @@ public class DonorController {
     public ResponseEntity<Page<DonorResponse>> getSearch(DonorSearchRequest request, @RequestParam int page, @RequestParam int size,
                                                          @RequestParam String sortBy, @RequestParam String direction){
         return new ResponseEntity<>(donorService.searchDonorByDistrict(request, page, size, sortBy, direction), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyRole('DONOR','USER')")
+    @GetMapping("/nearby")
+    public ResponseEntity<Page<DonorResponse>> nearbyDonors(@Valid @ModelAttribute NearbyDonorRequest request,
+                                                              @RequestParam(defaultValue = "0") int page,
+                                                              @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(donorService.findNearbyDonors(request.latitude(), request.longitude(),
+                request.radiusKm(), request.bloodGroup(), page, size));
     }
 
 }
